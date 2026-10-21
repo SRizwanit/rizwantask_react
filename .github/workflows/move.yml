@@ -21,7 +21,7 @@ jobs:
           mkdir -p rizwantask_react/src/pages/admin
           
           # Admin ফোল্ডারের ফাইলগুলো admin ফোল্ডারে কপি করা
-          cp -r rizwantask_react/src/pages/Admin/. rizwantask_react/src/pages/admin/
+          cp -r rizwantask_react/src/pages/Admin/ rizwantask_react/src/pages/admin/
           
           # পুরোনো বড় হাতের Admin ফোল্ডারটি গিট থেকে ডিলিট করা
           git rm -r rizwantask_react/src/pages/Admin
