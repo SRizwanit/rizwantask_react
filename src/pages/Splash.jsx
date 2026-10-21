@@ -68,26 +68,6 @@ export default function Splash() {
     return () => { timers.forEach(clearTimeout); document.body.removeEventListener('click', leave); document.body.classList.remove('out'); };
   }, []);
 
-  return () => cancelAnimationFrame(raf);
-  }, []);
-
-  // লগইন থাকলে টাস্কে, না থাকলে লগইনে; স্ক্রিনে চাপ দিলে সাথে সাথে
-  useEffect(() => {
-    const reduce = reducedMotion();
-    let has = false;
-    try { has = !!localStorage.getItem('kp_session_v1'); } catch (e) { /* ignore */ }
-    const to = has ? 'task' : 'login';
-    let gone = false, t2 = 0;
-    const leave = () => {
-      if (gone) return; gone = true;
-      document.body.classList.add('out');
-      t2 = setTimeout(() => go(to, true), reduce ? 0 : 420);
-    };
-    const t1 = setTimeout(leave, reduce ? 700 : 3250);
-    document.body.addEventListener('click', leave);
-    return () => { clearTimeout(t1); clearTimeout(t2); document.body.removeEventListener('click', leave); document.body.classList.remove('out'); };
-  }, []);
-
   return (
     <PageShell title="RizwanTask" themeColor="#06231c" sheets={[]} css={css}>
       <div className="lattice"></div>
