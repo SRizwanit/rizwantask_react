@@ -355,3 +355,41 @@
     .pane{border-radius:12px}
   }
   @media (pointer:coarse){button.ico{min-width:var(--ctl)}.bar button,.bar button.ico{min-height:32px}.bar button.ico{width:32px}}
+
+  /* ===== ফিক্স ১: ছবি/টেক্সট প্যানেলের টুলবার সবসময় এক লাইনে (ছোট মাপ, নিচে নামবে না) ===== */
+  .bar{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:none;gap:6px;padding:5px 8px;min-height:38px}
+  .bar::-webkit-scrollbar{display:none}
+  .bar>*{flex:none}
+  #txtInfo{margin-left:auto;padding-left:6px;font-size:11px}
+  @media (max-width:640px){
+    .bar{gap:4px;padding:4px 6px;min-height:34px}
+    .bar>span:first-child{display:none}                 /* "ছবি"/"টেক্সট" লেবেল: জায়গা বাঁচাতে (প্যানেল দেখেই বোঝা যায়) */
+    .bar button{min-height:26px;padding:0 6px;font-size:11px;gap:4px}
+    .bar button.ico{width:26px;padding:0}
+    .bar button .i{width:14px;height:14px}
+    #zFit{width:26px;padding:0}#zFit span{display:none}  /* ফিট: শুধু ভেক্টর আইকন (title আছে) */
+    #zVal{min-width:40px;padding:0 3px;font-size:11px}
+    #txtInfo{font-size:10px;padding-left:2px}
+    textarea,#hl{padding:10px 12px}
+  }
+
+  /* ===== ফিক্স ২: শুরুর লোডিং — কার্ড ঠিক মাঝখানে (আগে main-এর ২-কলাম গ্রিডে বামে আটকে ছিল) ===== */
+  main.view-entry-loading{
+    display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);place-items:center;gap:0;
+    flex:1 1 auto;width:100%;min-height:100dvh;padding:24px 18px;background:var(--bg);
+  }
+  .view-entry-loading__card{width:min(100%,360px);margin:0 auto;padding:32px 24px 26px;background:color-mix(in srgb,var(--bg) 94%,var(--panel));box-shadow:var(--sh-2),0 24px 60px rgba(11,95,76,.08)}
+  .view-entry-loading__eyebrow{white-space:nowrap;gap:8px;font-size:10px;letter-spacing:1.1px}
+  .view-entry-loading__eyebrow span{flex:none}
+  .view-entry-loading__title{text-wrap:balance}
+  .view-entry-loading__description{text-wrap:balance}
+  .view-entry-loading__progress{height:5px}
+  .view-entry-loading__hint{animation:viewEntryHint 1.8s ease-in-out infinite}
+  @keyframes viewEntryHint{0%,100%{opacity:.55}50%{opacity:1}}
+  @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .view-entry-loading__orbit{border-top-color:#43a58b;border-right-color:#43a58b}
+    :root:not([data-theme=light]) .view-entry-loading__book{color:#43a58b;background:rgba(67,165,139,.14)}
+    :root:not([data-theme=light]) .view-entry-loading__dot{background:#43a58b}}
+  :root[data-theme=dark] .view-entry-loading__orbit{border-top-color:#43a58b;border-right-color:#43a58b}
+  :root[data-theme=dark] .view-entry-loading__book{color:#43a58b;background:rgba(67,165,139,.14)}
+  :root[data-theme=dark] .view-entry-loading__dot{background:#43a58b}
+  @media (prefers-reduced-motion:reduce){.view-entry-loading__hint{animation:none}}
