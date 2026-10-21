@@ -209,3 +209,49 @@
   /* view.html: সেটিংস ও Gemini API বাটন শুধু অ্যাডমিনের জন্য দৃশ্যমান */
   body:not(.is-admin) #btnSettings,body:not(.is-admin) #apiBox,body:not(.is-admin) #btnAutoApi,
   body:not(.is-admin) #dlg,body:not(.is-admin) #dlgApi,body:not(.is-admin) #dlgCfg{display:none!important}
+
+
+  /* Task → View: initial page loading experience */
+  .view-entry-loading{
+    min-height:100dvh;width:100%;display:grid;place-items:center;position:relative;isolation:isolate;
+    overflow:hidden;padding:24px 18px;background:var(--bg);color:var(--fg);
+  }
+  .view-entry-loading::before,.view-entry-loading::after{
+    content:"";position:absolute;z-index:-1;pointer-events:none;border-radius:50%;filter:blur(1px);
+  }
+  .view-entry-loading::before{
+    width:min(72vw,420px);aspect-ratio:1;top:-24%;right:-18%;
+    background:radial-gradient(circle,rgba(11,95,76,.10),rgba(11,95,76,0) 68%);
+  }
+  .view-entry-loading::after{
+    width:min(70vw,380px);aspect-ratio:1;bottom:-28%;left:-18%;
+    background:radial-gradient(circle,rgba(37,99,235,.07),rgba(37,99,235,0) 70%);
+  }
+  .view-entry-loading__card{
+    width:min(100%,390px);display:flex;flex-direction:column;align-items:center;text-align:center;
+    padding:34px 25px 27px;border:1px solid var(--line);border-radius:24px;
+    background:color-mix(in srgb,var(--bg) 90%,var(--panel));
+    box-shadow:0 18px 55px rgba(15,23,42,.07),0 2px 8px rgba(15,23,42,.035);
+    animation:viewEntryRise .45s cubic-bezier(.2,.75,.25,1) both;
+  }
+  .view-entry-loading__mark{width:94px;height:94px;position:relative;display:grid;place-items:center;margin:0 0 23px}
+  .view-entry-loading__orbit{position:absolute;inset:1px;border:2px solid var(--line);border-top-color:#0b5f4c;border-right-color:#0b5f4c;border-radius:50%;animation:viewEntrySpin 1.15s linear infinite}
+  .view-entry-loading__book{width:68px;height:68px;border-radius:22px;display:grid;place-items:center;
+    background:linear-gradient(145deg,rgba(11,95,76,.13),rgba(11,95,76,.045));color:#0b5f4c}
+  .view-entry-loading__book svg{width:37px;height:37px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}
+  .view-entry-loading__dot{position:absolute;width:9px;height:9px;border:2px solid var(--bg);border-radius:50%;background:#0b5f4c;box-shadow:0 0 0 3px rgba(11,95,76,.1)}
+  .view-entry-loading__dot--one{right:3px;top:17px;animation:viewEntryPulse 1.6s ease-in-out infinite}
+  .view-entry-loading__dot--two{left:5px;bottom:15px;opacity:.55;animation:viewEntryPulse 1.6s .5s ease-in-out infinite}
+  .view-entry-loading__eyebrow{display:flex;align-items:center;justify-content:center;gap:9px;margin:0 0 10px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:1.35px}
+  .view-entry-loading__eyebrow span{width:4px;height:4px;border-radius:50%;background:#0b5f4c;opacity:.8}
+  .view-entry-loading__title{margin:0;color:var(--fg);font-size:clamp(20px,5vw,24px);font-weight:700;line-height:1.5;letter-spacing:-.25px}
+  .view-entry-loading__description{max-width:290px;margin:8px 0 22px;color:var(--muted);font-size:13px;line-height:1.8}
+  .view-entry-loading__progress{width:min(100%,210px);height:4px;overflow:hidden;border-radius:99px;background:var(--line)}
+  .view-entry-loading__progress span{display:block;width:38%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#0b5f4c,#43a58b);animation:viewEntryProgress 1.55s ease-in-out infinite}
+  .view-entry-loading__hint{margin:13px 0 0;color:var(--muted);font-size:11px;line-height:1.6}
+  @keyframes viewEntrySpin{to{transform:rotate(360deg)}}
+  @keyframes viewEntryPulse{0%,100%{transform:scale(.85);opacity:.45}50%{transform:scale(1.15);opacity:1}}
+  @keyframes viewEntryProgress{0%{transform:translateX(-120%)}55%{transform:translateX(160%)}100%{transform:translateX(300%)}}
+  @keyframes viewEntryRise{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+  @media(max-width:420px){.view-entry-loading__card{padding:29px 19px 24px;border-radius:21px}.view-entry-loading__mark{width:84px;height:84px}.view-entry-loading__book{width:61px;height:61px;border-radius:19px}}
+  @media(prefers-reduced-motion:reduce){.view-entry-loading__card{animation:none}.view-entry-loading__orbit,.view-entry-loading__dot,.view-entry-loading__progress span{animation:none}.view-entry-loading__progress span{width:65%;margin-left:17.5%}}

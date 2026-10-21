@@ -71,7 +71,28 @@ export default function View() {
       css={css}
       cssFirst
     >
-      {ctx ? <ViewPage ctx={ctx} /> : <div style={{ margin: 'auto', color: 'var(--muted)' }}>লোড হচ্ছে…</div>}
+      {ctx ? <ViewPage ctx={ctx} /> : (
+        <main className="view-entry-loading" role="status" aria-live="polite" aria-busy="true">
+          <section className="view-entry-loading__card" aria-label="কিতাবের তথ্য প্রস্তুত হচ্ছে">
+            <div className="view-entry-loading__mark" aria-hidden="true">
+              <span className="view-entry-loading__orbit" />
+              <span className="view-entry-loading__book">
+                <svg viewBox="0 0 32 32" focusable="false">
+                  <path d="M16 9.2C12.7 6.9 8.7 6.5 4.8 8v16c4-1.5 7.9-1.1 11.2 1.2 3.3-2.3 7.2-2.7 11.2-1.2V8c-3.9-1.5-7.9-1.1-11.2 1.2Z" />
+                  <path d="M16 9.4v15.7M8.2 11.3c2-.4 4.1 0 5.8 1.1M8.2 15.1c2-.4 4.1 0 5.8 1.1M23.8 11.3c-2-.4-4.1 0-5.8 1.1M23.8 15.1c-2-.4-4.1 0-5.8 1.1" />
+                </svg>
+              </span>
+              <span className="view-entry-loading__dot view-entry-loading__dot--one" />
+              <span className="view-entry-loading__dot view-entry-loading__dot--two" />
+            </div>
+            <p className="view-entry-loading__eyebrow">RIZWANTASK <span /> KATAB PROOFING</p>
+            <h2 className="view-entry-loading__title">কিতাব প্রস্তুত করা হচ্ছে</h2>
+            <p className="view-entry-loading__description">আপনার কিতাবের তথ্য ও সেটিংস লোড হচ্ছে।</p>
+            <div className="view-entry-loading__progress" aria-hidden="true"><span /></div>
+            <p className="view-entry-loading__hint">অনুগ্রহ করে অপেক্ষা করুন…</p>
+          </section>
+        </main>
+      )}
     </PageShell>
   );
 }
