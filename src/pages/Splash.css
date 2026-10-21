@@ -43,31 +43,15 @@ body.out{opacity:0;transform:scale(1.03)}
 @keyframes pop{from{opacity:0;transform:scale(0) rotate(-90deg)}to{opacity:1;transform:scale(1) rotate(0)}}
 @keyframes twinkle{50%{transform:scale(.6) rotate(20deg);opacity:.6}}
 
-/* নাম — টাইপিং ইফেক্ট */
+/* নাম */
 h1{margin:0;font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;font-weight:700;
-  font-size:clamp(40px,11vw,62px);line-height:1.05;letter-spacing:.01em;display:flex;min-height:1.05em}
-h1 span{position:relative;display:inline-block;opacity:0;
+  font-size:clamp(40px,11vw,62px);line-height:1.05;letter-spacing:.01em;display:flex}
+h1 span{display:inline-block;opacity:0;transform:translateY(18px);
   background:linear-gradient(100deg,var(--g3) 0%,var(--g1) 28%,#fffbe8 50%,var(--g2) 72%,var(--g3) 100%);background-size:260% 100%;
-  -webkit-background-clip:text;background-clip:text;color:transparent}
-h1 span.on{opacity:1;animation:keyin .5s cubic-bezier(.2,1.4,.4,1) both,sheen 3.4s linear infinite}
-@keyframes keyin{0%{opacity:0;transform:translateY(14px) scale(1.5);filter:drop-shadow(0 0 12px #f2d27a)}60%{opacity:1;transform:translateY(-3px) scale(1)}100%{opacity:1;transform:none;filter:drop-shadow(0 0 0 transparent)}}
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:rise .7s cubic-bezier(.2,.9,.3,1) calc(1.15s + var(--n)*.06s) forwards,sheen 3.4s linear 2.2s infinite}
+@keyframes rise{to{opacity:1;transform:none}}
 @keyframes sheen{from{background-position:130% 0}to{background-position:-130% 0}}
-/* ব্লিংকিং কার্সর */
-h1 span.last::after{content:"";position:absolute;right:-6px;top:12%;bottom:8%;width:3px;border-radius:2px;background:var(--g1);box-shadow:0 0 10px rgba(242,210,122,.85);animation:caret .7s steps(1) infinite}
-h1.done span.last::after{animation:caretOut 1s forwards}
-@keyframes caret{50%{opacity:0}}
-@keyframes caretOut{0%{opacity:1}25%{opacity:0}50%{opacity:1}75%{opacity:0}100%{opacity:0}}
-/* টাইপিং শেষে সোনালি দীপ্তি */
-h1.done{animation:glow 1.4s ease-out forwards}
-@keyframes glow{0%{filter:drop-shadow(0 0 0 transparent)}40%{filter:drop-shadow(0 0 16px rgba(242,210,122,.75))}100%{filter:drop-shadow(0 0 5px rgba(242,210,122,.28))}}
-
-/* অতিরিক্ত এনিমেশন: ভাসমান লোগো ও উল্কা */
-.mk{animation:floaty 4.5s ease-in-out 2.5s infinite}
-@keyframes floaty{50%{transform:translateY(-6px)}}
-.shoot{position:fixed;z-index:1;top:var(--y);left:-12%;width:120px;height:1.5px;pointer-events:none;opacity:0;
-  background:linear-gradient(90deg,transparent,#fff7d6);border-radius:2px;box-shadow:0 0 8px rgba(255,247,214,.7);
-  animation:shoot 7s ease-in var(--w) infinite}
-@keyframes shoot{0%{opacity:0;transform:translate(0,0) rotate(28deg)}3%{opacity:1}20%{opacity:0;transform:translate(115vw,62vh) rotate(28deg)}100%{opacity:0}}
 .tag{margin:10px 0 0;font-size:15px;color:#a9d6c6;letter-spacing:.04em;opacity:0;animation:fade .8s 1.9s forwards}
 .rule{display:flex;align-items:center;gap:10px;margin:16px 0 0;opacity:0;animation:fade .8s 2s forwards}
 .rule b{display:block;width:54px;height:1px;background:linear-gradient(90deg,transparent,var(--g2))}
@@ -86,8 +70,7 @@ h1.done{animation:glow 1.4s ease-out forwards}
 @keyframes dot{0%,80%,100%{opacity:.2}40%{opacity:1}}
 
 @media(prefers-reduced-motion:reduce){
-  .lattice,.halo,.ring,#tw i,h1 span,.mark .sp,.dots i,.mk,h1.done{animation:none!important}
-  .shoot,h1 span.last::after{display:none}
+  .lattice,.halo,.ring,#tw i,h1 span,.mark .sp,.dots i{animation:none!important}
   .mark .d{animation:none;stroke-dashoffset:0}
   .bsm,.halo,.ring,.mark .plate,.mark .pg,.mark .sp,h1 span,.tag,.rule,.load{opacity:1;transform:none}
   .fill{animation:none;width:100%}
