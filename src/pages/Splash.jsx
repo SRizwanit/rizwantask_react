@@ -7,11 +7,13 @@ import css from './Splash.css?inline';
 
 const NAME = 'RizwanTask';
 const T_DELAY = 600, DUR = 2300;
+const TYPE_START = 1000, TYPE_STEP = 190, END_HOLD = 650; // টাইপিং শুরু, প্রতি অক্ষরের বিরতি, শেষে থামার সময় (ms)
 const ease = (t) => (t < 0.35 ? (t / 0.35) * 0.38 : t < 0.7 ? 0.38 + ((t - 0.35) / 0.35) * 0.34 : 0.72 + ((t - 0.7) / 0.3) * 0.28);
 const reducedMotion = () => !!window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
 
 export default function Splash() {
   const [pct, setPct] = useState(0);
+  const [typed, setTyped] = useState(0); // কয়টি অক্ষর টাইপ হয়েছে
 
   // ঝিলিমিলি তারা (একবারই তৈরি হয়)
   const stars = useMemo(() => {
@@ -34,6 +36,39 @@ export default function Splash() {
     };
     tick(performance.now());
     return () => cancelAnimationFrame(raf);
+  }, []);
+
+  // টাইপিং ইফেক্ট; টাইপিং শেষ হলে লগইন থাকলে টাস্কে, না থাকলে লগইনে; স্ক্রিনে চাপ দিলে সাথে সাথে
+  useEffect(() => {
+    const reduce = reducedMotion();
+    let has = false;
+    try { has = !!localStorage.getItem('kp_session_v1'); } catch (e) { /* ignore */ }
+    const to = has ? 'task' : 'login';
+    let gone = false;
+    const timers = [];
+    const later = (f, ms) => { timers.push(setTimeout(f, ms)); };
+    const leave = () => {
+      if (gone) return; gone = true;
+      document.body.classList.add('out');
+      later(() => go(to, true), reduce ? 0 : 420);
+    };
+    if (reduce) {
+      setTyped(NAME.length);
+      later(leave, 700);
+    } else {
+      let i = 0;
+      const step = () => {
+        i += 1; setTyped(i);
+        if (i < NAME.length) later(step, TYPE_STEP);
+        else later(leave, END_HOLD); // টাইপিং শেষ → পরের পেইজ
+      };
+      later(step, TYPE_START);
+    }
+    document.body.addEventListener('click', leave);
+    return () => { timers.forEach(clearTimeout); document.body.removeEventListener('click', leave); document.body.classList.remove('out'); };
+  }, []);
+
+  return () => cancelAnimationFrame(raf);
   }, []);
 
   // লগইন থাকলে টাস্কে, না থাকলে লগইনে; স্ক্রিনে চাপ দিলে সাথে সাথে
@@ -60,6 +95,8 @@ export default function Splash() {
       <div id="tw" aria-hidden="true">
         {stars.map((s, i) => <i key={i} style={s} />)}
       </div>
+      <div className="shoot" style={{ '--y': '12%', '--w': '1.2s' }} aria-hidden="true"></div>
+      <div className="shoot" style={{ '--y': '34%', '--w': '4.4s' }} aria-hidden="true"></div>
 
     <main className="stage" aria-label="RizwanTask">
       <p className="bsm" lang="ar">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
@@ -92,8 +129,10 @@ export default function Splash() {
           <path className="sp" d="M40.50 3.30 L41.18 5.07 L43.07 5.17 L41.59 6.36 L42.09 8.18 L40.50 7.15 L38.91 8.18 L39.41 6.36 L37.93 5.17 L39.82 5.07z" />
         </svg>
       </div>
-      <h1 id="nm" aria-label="RizwanTask">
-        {[...NAME].map((c, n) => <span key={n} style={{ '--n': n }} aria-hidden="true">{c}</span>)}
+      <h1 id="nm" aria-label="RizwanTask" className={typed >= NAME.length ? 'done' : ''}>
+        {[...NAME].map((c, n) => (
+          <span key={n} className={n < typed ? (n === typed - 1 ? 'on last' : 'on') : ''} style={{ '--n': n }} aria-hidden="true">{c}</span>
+        ))}
       </h1>
       <p className="tag">
         কিতাব প্রুফিং
