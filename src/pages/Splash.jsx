@@ -7,7 +7,7 @@ import css from './Splash.css?inline';
 
 const NAME = 'RizwanTask';
 const T_DELAY = 600, DUR = 2300;
-const TYPE_START = 1000, TYPE_STEP = 190, END_HOLD = 650; // টাইপিং শুরু, প্রতি অক্ষরের বিরতি, শেষে থামার সময় (ms)
+const TYPE_START = 1000, TYPE_STEP = 190, END_HOLD = 6000; // টাইপিং শুরু, প্রতি অক্ষরের বিরতি, শেষে থামার সময় (ms)
 const ease = (t) => (t < 0.35 ? (t / 0.35) * 0.38 : t < 0.7 ? 0.38 + ((t - 0.35) / 0.35) * 0.34 : 0.72 + ((t - 0.7) / 0.3) * 0.28);
 const reducedMotion = () => !!window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches;
 
