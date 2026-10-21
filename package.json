@@ -1,0 +1,22 @@
+{
+  "name": "rizwantask-react",
+  "private": true,
+  "version": "3.0.0",
+  "type": "module",
+  "description": "RizwanTask — কিতাব প্রুফিং (React + Vite, Supabase)",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node scripts/postbuild.mjs",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "firebase": "^12.19.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.11"
+  }
+}
