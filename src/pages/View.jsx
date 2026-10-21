@@ -96,7 +96,7 @@ export default function View() {
               <span className="view-entry-loading__dot view-entry-loading__dot--one" />
               <span className="view-entry-loading__dot view-entry-loading__dot--two" />
             </div>
-            <p className="view-entry-loading__eyebrow">RIZWANTASK <span /> KATAB PROOFING</p>
+            <p className="view-entry-loading__eyebrow">RIZWANTASK <span /> কিতাব প্রুফিং</p>
             <h2 className="view-entry-loading__title">কিতাব প্রস্তুত করা হচ্ছে</h2>
             <p className="view-entry-loading__description">আপনার কিতাবের তথ্য ও সেটিংস লোড হচ্ছে।</p>
             <div className="view-entry-loading__progress" aria-hidden="true"><span /></div>
