@@ -33,6 +33,17 @@ import {
   numOf, openTab, toB64, toPngBlob
 } from './view/utils.js';
 
+/* ভেক্টর (SVG) আইকন: আগে যেগুলো লেখা-চিহ্ন (− + A− A+ ✕) ছিল; stroke=currentColor, তাই থিম/ডার্ক মোডে নিজে রং বদলায় */
+const VP = {
+  minus: <path d="M5 12h14" />,
+  plus: <path d="M12 5v14M5 12h14" />,
+  fit: <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />,
+  close: <path d="M6 6l12 12M18 6L6 18" />,
+  fontDown: <><path d="M3 18 8 6l5 12M5 14h6" /><path d="M16 12h5" /></>,
+  fontUp: <><path d="M3 18 8 6l5 12M5 14h6" /><path d="M18.5 9.5v5M16 12h5" /></>
+};
+const V = ({ n }) => (<svg className="i" viewBox="0 0 24 24" aria-hidden="true" focusable="false">{VP[n]}</svg>);
+
 const RATES = ['0.6', '0.8', '1', '1.2', '1.5', '1.8', '2'].map((v) => ({ value: v, label: v + '×' }));
 const isNoTable = (e) => /PGRST205|PGRST200|42P01|relation .*page_proofs|404/i.test((e && e.message) || '');
 
@@ -1105,7 +1116,7 @@ function ViewPage({ ctx }) {
     else t += dirty ? ' • অসংরক্ষিত' : (sha ? ' • সেভড' : ' • টেক্সট নেই (পেস্ট করে সেভ করুন)');
     if (pf) t += ' • প্রুফড' + ownerTag(stem);
     const rv = reviewsRef.current.get(stem);
-    if (rv && ownersRef.current.get(stem) === ME) t += rv.s === 'approved' ? ' • অনুমোদিত ✔' : rv.s === 'correction' ? ' • সংশোধন দরকার' + (rv.note ? ' (' + rv.note + ')' : '') : ' • রিভিউ বাকি';
+    if (rv && ownersRef.current.get(stem) === ME) t += rv.s === 'approved' ? ' • অনুমোদিত' : rv.s === 'correction' ? ' • সংশোধন দরকার' + (rv.note ? ' (' + rv.note + ')' : '') : ' • রিভিউ বাকি';
     if (!apiEnabled) t += ' • এপি আই বন্ধ';
     if (apiRun) t += ' • ' + API_NAME[apiRun.n] + ' চলছে' + (apiRun.stem !== stem ? ' (' + apiRun.stem + ')' : '') + (apiRun.chars ? ' ' + apiRun.chars + ' অক্ষর' : '') + '…';
     stText = t; stCls = (dirty || loadErr) ? 'dirty' : '';
@@ -1161,17 +1172,19 @@ function ViewPage({ ctx }) {
           <button id="btnAiCopy" className="ico" title="AI প্রম্পট কপি — GitHub ডাউনলোড অংশ + এই পেইজের ছবির raw লিংক + OCR প্রম্পট (Supabase), একসাথে ক্লিপবোর্ডে" aria-label="AI প্রম্পট কপি" onClick={aiCopy}><Ic n="sparkle" /></button>
         </span>{' '}
         <span id="doneCnt" hidden={doneCnt == null} title="আপনার সম্পন্ন (প্রুফড) টাস্ক" aria-label="আপনার সম্পন্ন টাস্ক">{doneCnt == null ? '' : bnNum(doneCnt)}</span>{' '}
-        <span id="stText" className={stCls}>{stText}</span>
+        <span id="stText" className={stCls} role="status" aria-live="polite">{stText}</span>
       </div>
 
       <main id="main" className={cfg.swap ? 'swap' : ''} style={{ '--fs': cfg.fs + 'px' }}>
         <section className="pane pane-img">
           <div className="bar">
             <span>ছবি</span>{' '}
-            <button id="zOut" onClick={() => zoom(-25)}>−</button>
-            <span id="zVal">{cfg.zoom}%</span>
-            <button id="zIn" onClick={() => zoom(25)}>+</button>
-            <button id="zFit" onClick={() => zoom(0)}>ফিট</button>
+            <span className="seg" role="group" aria-label="ছবির জুম">
+              <button id="zOut" className="ico" title="ছোট করুন" aria-label="জুম আউট" onClick={() => zoom(-25)}><V n="minus" /></button>
+              <span id="zVal" aria-live="polite">{cfg.zoom}%</span>
+              <button id="zIn" className="ico" title="বড় করুন" aria-label="জুম ইন" onClick={() => zoom(25)}><V n="plus" /></button>
+            </span>
+            <button id="zFit" title="ছবি প্যানেলে ফিট করুন (১০০%)" onClick={() => zoom(0)}><V n="fit" /><span>ফিট</span></button>
           </div>
           <div className="body" id="imgBox" ref={imgBoxRef} onScroll={lazyView}>
             <img id="img" ref={imgRef} alt="" title="বড় করে দেখতে ক্লিক করুন" style={{ width: cfg.zoom + '%' }} onClick={openLightbox} onLoad={onImgLoad} onError={onImgError} />
@@ -1181,8 +1194,10 @@ function ViewPage({ ctx }) {
         <section className="pane pane-txt">
           <div className="bar">
             <span>টেক্সট</span>{' '}
-            <button id="fOut" title="ফন্ট ছোট" onClick={() => fontSize(-2)}>A−</button>
-            <button id="fIn" title="ফন্ট বড়" onClick={() => fontSize(2)}>A+</button>{' '}
+            <span className="seg" role="group" aria-label="ফন্টের মাপ">
+              <button id="fOut" className="ico" title="ফন্ট ছোট" aria-label="ফন্ট ছোট" onClick={() => fontSize(-2)}><V n="fontDown" /></button>
+              <button id="fIn" className="ico" title="ফন্ট বড়" aria-label="ফন্ট বড়" onClick={() => fontSize(2)}><V n="fontUp" /></button>
+            </span>{' '}
             <button id="btnCopy" className="ico" title="কপি (নির্বাচিত অংশ, না থাকলে পুরো টেক্সট)" aria-label="কপি" onClick={copyClick}><Ic n="copy" /></button>{' '}
             <button id="btnPaste" className="ico" title="পেস্ট (আগের সব টেক্সট মুছে নতুন টেক্সট বসবে, কার্সর শুরুতে থাকবে)" aria-label="পেস্ট" onClick={pasteClick}><Ic n="paste" /></button>{' '}
             <span id="txtInfo" title="খসড়া = এই ব্রাউজারে সংরক্ষিত অসংরক্ষিত খসড়ার সংখ্যা">{hasCur ? text.length + ' অক্ষর' + (nDrafts ? ' • খসড়া ' + nDrafts : '') : ''}</span>
@@ -1206,6 +1221,7 @@ function ViewPage({ ctx }) {
       <div id="lb" className={lb.open ? 'open' : ''} aria-hidden={lb.open ? 'false' : 'true'} onClick={closeLightbox}>
         <div id="lbTitle">{lb.title}</div>
         <button id="lbDl" title="মূল ছবি ডাউনলোড" aria-label="ডাউনলোড" onClick={(e) => { e.stopPropagation(); downloadCurrent(); }}><Ic n="download" /></button>{' '}
+        <button id="lbClose" title="বন্ধ করুন (Esc)" aria-label="বন্ধ করুন" onClick={(e) => { e.stopPropagation(); closeLightbox(); }}><V n="close" /></button>{' '}
         <img id="lbImg" alt="" src={lb.open ? lb.src : undefined} />
       </div>
 
