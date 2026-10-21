@@ -1,0 +1,78 @@
+
+/* কিতাবের কার্ড: বাটনের ডিফল্ট nowrap/center বাতিল, লেখা বাম-সারিবদ্ধ ও র‍্যাপ হবে */
+.book{align-items:stretch;justify-content:flex-start;white-space:normal;text-align:left;font-weight:400;gap:0}
+.book .cv{width:100%}
+.book .bt{width:100%;padding:12px 13px 14px;display:flex;flex-direction:column;gap:5px}
+.book .bt b{font-size:14.5px;line-height:1.45;font-weight:600;overflow-wrap:anywhere}
+.book .bt small{display:block;font-size:12.5px;line-height:1.5;overflow-wrap:anywhere}
+.logo-sm{display:flex;width:30px;height:30px;border-radius:9px;background:var(--pri);color:var(--pri-fg);align-items:center;justify-content:center}.logo-sm .i{width:18px;height:18px}
+header.top h2{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* হেডারে সম্পন্ন টাস্কের সংখ্যা */
+.cnt{display:inline-flex;align-items:center;gap:5px;flex:none;padding:4px 10px 4px 8px;border-radius:99px;background:rgba(242,210,122,.16);border:1px solid rgba(242,210,122,.55);color:#fff;line-height:1;white-space:nowrap}
+.cnt .i{width:14px;height:14px;color:#f2d27a;stroke-width:2.6}
+.cnt b{font-size:15px;font-weight:700;color:#f7e2a0;font-variant-numeric:tabular-nums}
+.cnt small{font-size:11.5px;opacity:.9}
+.book .cv{position:relative}
+/* কার্ডে: সম্পন্ন পেইজ / বাকি পেইজ */
+.book .bt small.pn{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px;margin-top:5px;font-size:12.5px;color:var(--muted)}
+.book .pn .dn{color:var(--ok);font-weight:700}
+.book .pn .rm{color:var(--gold,#c9972b);font-weight:700}
+.book .pn .rm.u{font-weight:500;color:var(--muted)}
+.book .pn .sl{color:var(--muted)}
+.book .lastb{position:absolute;top:8px;left:8px;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:700;background:linear-gradient(135deg,#a8761f,#f2d27a);color:#4a3200;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+/* লোডিং স্কেলিটন */
+.skl{display:block;height:12px;border-radius:6px;background:linear-gradient(90deg,var(--panel2) 25%,var(--panel) 50%,var(--panel2) 75%);background-size:220% 100%;animation:kpSk 1.25s linear infinite}
+.skl.w50{width:50%}.skl.w60{width:60%}.skl.w80{width:80%}.skl.bar{height:8px;border-radius:99px;margin-top:8px}
+.book.sk{cursor:default;pointer-events:none}.book.sk:hover{transform:none;box-shadow:none}
+.book.sk .cv{background:linear-gradient(90deg,var(--panel2) 25%,var(--panel) 50%,var(--panel2) 75%);background-size:220% 100%;animation:kpSk 1.25s linear infinite}
+.book.sk .bt{gap:9px}
+.tile.sk{gap:10px;min-height:66px;justify-content:center}
+@keyframes kpSk{to{background-position:-220% 0}}
+@media(prefers-reduced-motion:reduce){.skl,.book.sk .cv{animation:none}}
+/* উপরের কার্ড: দৈনিক লক্ষ্য, টানা দিন, ব্যাজ, চালিয়ে যান */
+#dash:empty{display:none}
+#dash .card.dash{margin-bottom:14px;padding:14px}
+.drow{display:grid;grid-template-columns:1.25fr 1fr;gap:10px}
+.dgoal,.dstreak{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);min-width:0;text-align:left}
+.dgoal{cursor:pointer}
+.dgoal:active{background:var(--panel2)}
+.dl{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--muted)}
+.dl .i{width:14px;height:14px}
+.dgoal .dl{color:var(--pri)}.dstreak .dl{color:var(--gold,#c9972b)}
+.dv{font-size:13px;color:var(--muted)}.dv b{font-size:22px;color:var(--fg);font-variant-numeric:tabular-nums}
+.dh{font-size:11.5px;color:var(--muted);line-height:1.4}
+.dgoal.hit{border-color:var(--ok)}.dgoal.hit .dh{color:var(--ok);font-weight:600}
+.dbg{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.dbg span{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:11.5px;font-weight:600;border:1px dashed var(--line);color:var(--muted);opacity:.7}
+.dbg span .i{width:12px;height:12px}
+.dbg span.on{opacity:1;border:1px solid rgba(217,171,67,.7);background:linear-gradient(135deg,rgba(168,118,31,.18),rgba(242,210,122,.3));color:var(--gold,#a8761f)}
+#dResume{margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px;white-space:normal;text-align:center}
+#dResume .i{width:16px;height:16px;flex:none}
+/* আয়ের পূর্বাভাস */
+.fc{margin-bottom:14px;padding:14px 16px}
+.fc .fr{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.fc .fr:last-of-type{border-bottom:0}
+.fc .fr b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.fc .fr b.up{color:var(--ok)}
+.fc .fh{margin-top:6px}
+.book .bp{margin-top:6px}
+.book .rt{font-size:11.5px;color:var(--gold,#c9972b);font-weight:600}
+nav.bottom button{font-size:11.5px}
+/* নেভিগেশন বার সবসময় স্ক্রিনের নিচে স্থির থাকবে (ব্রাউজারের অ্যাড্রেসবার দেখা/লুকানোর সময়ও) */
+nav.bottom{position:fixed!important;left:0;right:0;bottom:0;top:auto!important;z-index:50;
+  padding-bottom:env(safe-area-inset-bottom,0px);will-change:transform;backface-visibility:hidden}
+nav.bottom[hidden]{display:none!important}
+/* হেডারে প্রোফাইল আইকন (নতুন নোটিশ থাকলে ব্যাজ) */
+#bProf{position:relative;flex:none}
+#bProf .i{width:18px;height:18px}
+#bProf .tbadge{position:absolute;top:-6px;right:-6px;min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:#e5484d;color:#fff;font-size:10.5px;font-weight:700;line-height:17px;text-align:center;border:2px solid var(--hdr-edge,#0b5f4c);box-sizing:content-box}
+@media(max-width:480px){header.top #bOut .lbl{display:none}}
+/* গাইড ডায়ালগ: অ্যানিমেটেড ভেক্টর স্টেজ + ধাপের তালিকা */
+#gDlg{width:min(94vw,460px);max-width:none;max-height:94vh;overflow:auto}
+.gtag{display:inline-block;padding:3px 12px;border-radius:99px;background:linear-gradient(135deg,#a8761f,#f2d27a);color:#4a3200;font-weight:700;font-size:12.5px;margin-bottom:10px}
+.gstage{border-radius:14px;overflow:hidden;border:1px solid rgba(217,171,67,.55);background:#0b3d33;margin:0 0 12px;line-height:0;box-shadow:0 6px 18px rgba(8,60,48,.18)}
+.gstage svg{display:block;width:100%;height:auto}
+.gsubs{list-style:none;margin:12px 0 0;padding:0;text-align:left;display:flex;flex-direction:column;gap:6px}
+.gsubs li{display:flex;gap:9px;align-items:flex-start;padding:7px 10px;border-radius:10px;border:1px solid rgba(120,140,132,.35);font-size:13.5px;line-height:1.55;opacity:.62;transition:opacity .25s,border-color .25s,background .25s}
+.gsubs li i{flex:none;width:21px;height:21px;margin-top:1px;border-radius:50%;background:#0b5f4c;color:#f7e2a0;font-style:normal;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.gsubs li.on{opacity:1;border-color:#d9ab43;background:rgba(217,171,67,.15)}

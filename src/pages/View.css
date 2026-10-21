@@ -1,0 +1,211 @@
+
+  /* আরবি/উর্দু অংশের জন্য নূরে হুদা (Noorehuda) — শুধু আরবি ব্লকের অক্ষরে; বাংলা/ইংরেজি আগের ফন্টেই থাকে।
+     ফন্ট ফাইল: fonts/Noorehuda.ttf (বা .woff2) — ফোনে/পিসিতে ইনস্টল করা থাকলে সেটাই ব্যবহার হয় */
+  @font-face{
+    font-family:"Noorehuda";font-style:normal;font-weight:400;font-display:swap;
+    src:local("Noorehuda"),local("noorehuda"),local("Noorehuda Regular"),
+        url("__BASE__fonts/Noorehuda.woff2") format("woff2"),url("__BASE__fonts/Noorehuda.ttf") format("truetype");
+    unicode-range:U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF,U+200C-200F,U+0640;
+  }
+  :root{
+    --bg:#ffffff;--fg:#1b1f27;--muted:#6b7280;--line:#e3e7ee;--panel:#f4f6fa;--panel2:#eaeef5;
+    --pri:#2563eb;--pri-fg:#fff;--ok:#16a34a;--warn:#c2410c;--err:#dc2626;--hl:rgba(250,204,21,.38);--hlw:rgba(249,115,22,.5);
+    --ui:"Anek Bangla","Noto Sans Bengali","Kalpurush",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --txt:"Noorehuda","Noto Serif Bengali","Noto Naskh Arabic","Kalpurush","SolaimanLipi",serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme=light]){--bg:#14161a;--fg:#e8eaed;--muted:#9aa3b2;--line:#2a2e36;--panel:#1d2127;--panel2:#262b33;
+          --pri:#7aa7ff;--pri-fg:#0b0d10;--ok:#6fd08c;--warn:#fbbf24;--err:#f87171;--hl:rgba(250,204,21,.26);--hlw:rgba(251,146,60,.5)}
+  }
+  :root[data-theme=dark]{--bg:#14161a;--fg:#e8eaed;--muted:#9aa3b2;--line:#2a2e36;--panel:#1d2127;--panel2:#262b33;
+          --pri:#7aa7ff;--pri-fg:#0b0d10;--ok:#6fd08c;--warn:#fbbf24;--err:#f87171;--hl:rgba(250,204,21,.26);--hlw:rgba(251,146,60,.5)}
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{display:flex;flex-direction:column;height:100dvh;background:var(--bg);color:var(--fg);
+       font-family:var(--ui);font-size:14px;-webkit-font-smoothing:antialiased}
+
+  /* ছোট ভেক্টর আইকন (সব একই ছোট মাপ) */
+  .i{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  button,select,input{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 10px;
+                      transition:background .15s,border-color .15s,filter .15s}
+  button{cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1.25;white-space:nowrap}
+  button:hover{background:var(--panel2)}
+  button:active{filter:brightness(.92)}
+  button.ico{padding:5px 8px}
+  button.primary{background:var(--pri);border-color:var(--pri);color:var(--pri-fg);font-weight:600}
+  button.primary:hover{filter:brightness(1.06)}
+  button.on{background:var(--ok);border-color:var(--ok);color:#fff}
+  @media (prefers-color-scheme:dark){:root:not([data-theme=light]) button.on{color:#0b0d10}}
+  :root[data-theme=dark] button.on{color:#0b0d10}
+  button:disabled{opacity:.5;cursor:default}
+  /* ক্লিক রিপল ইফেক্ট (Material ripple): চাপলে চাপার বিন্দু থেকে বৃত্তাকার ঢেউ ছড়ায় */
+  button,.dd-it{position:relative;overflow:hidden;isolation:isolate}
+  /* রিপল: হালকা সবুজ ঢেউ (সাধারণ বোতামে উজ্জ্বল সবুজ, সবুজ বোতামে সাদাটে-সবুজ) + চেপে ধরা অবস্থায় বোতাম হালকা সবুজ আভা */
+  .rip{position:absolute;border-radius:50%;pointer-events:none;background:rgba(34,197,94,.6);transform:scale(0);opacity:.9;animation:rip .75s ease-out forwards}
+  button.on .rip{background:rgba(220,252,231,.9)}
+  @keyframes rip{0%{transform:scale(0);opacity:.9}65%{opacity:.55}100%{transform:scale(1);opacity:0}}
+  button:active:not(:disabled),.dd-it:active{box-shadow:inset 0 0 0 999px rgba(34,197,94,.18)}
+  @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .rip{background:rgba(74,222,128,.6)}:root:not([data-theme=light]) button.on .rip{background:rgba(21,128,61,.55)}}
+  :root[data-theme=dark] .rip{background:rgba(74,222,128,.6)}:root[data-theme=dark] button.on .rip{background:rgba(21,128,61,.55)}
+  @media (prefers-reduced-motion:reduce){.rip{display:none}}
+  select:focus,input:focus,button:focus-visible{outline:2px solid var(--pri);outline-offset:1px}
+
+  /* হেডার ও ফুটার: সবসময় এক লাইনে (inline); জায়গা না হলে আড়াআড়ি স্ক্রল */
+  header,footer{display:flex;flex-wrap:nowrap;align-items:center;gap:6px;padding:6px 8px;background:var(--bg);
+                overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+  header>*,footer>*{flex:none}
+  header{border-bottom:1px solid var(--line)}
+  footer{border-top:1px solid var(--line)}
+  footer button{padding:5px 9px}
+  #jump{width:72px}
+  /* স্ট্যাটাস: হেডারের নিচে পাতলা লাইনে (সবসময় দেখা যায়, খালি থাকলে লুকায়) */
+  #status{display:flex;align-items:center;gap:8px;padding:3px 8px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--line);background:var(--bg)}
+  #doneCnt{flex:1;min-width:0;text-align:center;font-size:15px;font-weight:700;color:var(--ok);font-variant-numeric:tabular-nums;line-height:1}
+  #stText{flex:0 1 auto;max-width:62%;margin-left:auto;min-width:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #stText.dirty{color:var(--warn);font-weight:600}
+  /* ছবির টুল (ডাউনলোড / Lens / Ai): স্ট্যাটাস লাইনের বাম ফাঁকা জায়গায় */
+  #imgTools{display:flex;align-items:center;gap:6px;flex:none}
+  #imgTools button{padding:3px 9px;border-radius:9px}
+  #imgTools button .i{width:15px;height:15px}
+
+  /* শোনার (TTS) বাটন: হেডিং টগলের পাশে, একটি গ্রুপে */
+  #ttsBox{display:inline-flex;align-items:center;gap:6px;padding-left:8px;margin-left:2px;border-left:1px solid var(--line)}
+
+  /* API বাটন: হেডারের একদম শেষে, শুধু আইকন */
+  #apiBox{display:inline-flex;align-items:center;gap:6px;padding-left:8px;margin-left:2px;border-left:1px solid var(--line)}
+  #btnApi.run{background:var(--pri);border-color:var(--pri);color:var(--pri-fg)}
+  #btnApi.run .i{animation:apiPulse 1s ease-in-out infinite}
+  @keyframes apiPulse{50%{opacity:.3}}
+  /* অটো OCR টগল: সবুজ = চালু, লাল = বন্ধ */
+  #btnAutoApi.on{background:var(--ok);border-color:var(--ok);color:#fff}
+  #btnAutoApi.off{background:var(--err);border-color:var(--err);color:#fff}
+  @media (prefers-color-scheme:dark){:root:not([data-theme=light]) #btnAutoApi.on,:root:not([data-theme=light]) #btnAutoApi.off{color:#0b0d10}}
+  :root[data-theme=dark] #btnAutoApi.on,:root[data-theme=dark] #btnAutoApi.off{color:#0b0d10}
+
+  /* নিজস্ব ড্রপডাউন (পপআপ তালিকাতেও একই ফন্ট) */
+  .dd-btn{justify-content:space-between;gap:6px;text-align:left}
+  .dd-btn .dd-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dd-btn .dd-ch{width:14px;height:14px;opacity:.7}
+  .dd-btn[data-for=sel]{width:130px}
+  .dd-btn[data-for=ttsRate]{width:70px;padding:5px 7px}
+  dialog .dd-btn{width:100%}
+  .dd-pop{position:fixed;z-index:100;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:12px;
+          box-shadow:0 8px 28px rgba(0,0,0,.28);overflow-y:auto;padding:4px;font-family:var(--ui);font-size:15px;
+          -webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  .dd-it{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;border-radius:8px;cursor:pointer;line-height:1.3}
+  .dd-it:hover{background:var(--panel)}
+  .dd-it.sel{background:var(--panel2);color:var(--pri);font-weight:600}
+  .dd-it .i{width:16px;height:16px}
+
+  /* সবসময় পাশাপাশি (বাম-ডান), ফোনেও */
+  main{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr}
+  main.swap .pane-img{order:2}
+  .pane{display:flex;flex-direction:column;min-width:0;min-height:0}
+  .pane-img{border-right:1px solid var(--line)}
+  main.swap .pane-img{border-right:0;border-left:1px solid var(--line)}
+  .bar{display:flex;flex-wrap:wrap;align-items:center;gap:5px;padding:4px 6px;background:var(--panel);border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+  .bar button,.bar select{padding:2px 8px;font-size:12px}
+  .bar button.ico{padding:3px 7px}
+  .bar button .i{width:14px;height:14px}
+  #txtInfo{margin-left:auto;font-size:11px;white-space:nowrap}
+  .body{flex:1;min-height:0;overflow:auto;position:relative;-webkit-overflow-scrolling:touch}
+  #img{display:block;height:auto;max-width:none;cursor:zoom-in}
+  #img:not([src]){cursor:default}
+  .msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:16px;color:var(--muted);pointer-events:none}
+  .msg:empty{display:none}
+  /* ছবি লোডিং: গোল রিং + শতাংশ (অ্যানিমেটেড) */
+  .ldr{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .ldr-ring{position:relative;width:92px;height:92px}
+  .ldr-ring svg{width:92px;height:92px;transform:rotate(-90deg);overflow:visible}
+  .ldr-ring .trk{fill:none;stroke:var(--line);stroke-width:6}
+  .ldr-ring .bar{fill:none;stroke:var(--pri);stroke-width:6;stroke-linecap:round;transition:stroke .3s}
+  .ldr-ring .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:var(--fg);font-variant-numeric:tabular-nums}
+  .ldr-ring .num small{font-size:12px;font-weight:600;margin-left:1px;color:var(--muted)}
+  .ldr.full .bar{stroke:var(--ok)}
+  .ldr.ind .ring-s{animation:ldrSpin 1s linear infinite;transform-origin:50% 50%}
+  .ldr.ind .bar{stroke-dasharray:60 400!important;stroke-dashoffset:0!important}
+  .ldr-sub{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;min-height:14px}
+  @keyframes ldrSpin{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.ldr.ind .ring-s{animation:none}}
+  textarea{display:block;width:100%;height:100%;border:0;outline:none;resize:none;padding:12px;border-radius:0;
+           direction:ltr;text-align:left;unicode-bidi:normal;   /* সব সময় LTR — আরবি/উর্দু লাইনও বাম দিক থেকে শুরু */
+           background:transparent;color:var(--fg);font-family:var(--txt);line-height:1.95;font-size:var(--fs,20px);position:relative;z-index:1}
+  /* শোনার সময় হাইলাইট: textarea-র পেছনে একই মাপ/ফন্টের একটি আয়না-স্তর; লেখা স্বচ্ছ, শুধু mark-এর রং দেখা যায় */
+  #hl{position:absolute;inset:0;z-index:0;display:none;pointer-events:none;overflow-x:hidden;overflow-y:auto;scrollbar-color:transparent transparent;
+      margin:0;border:0;padding:12px;background:transparent;color:transparent;white-space:pre-wrap;overflow-wrap:break-word;word-break:normal;
+      direction:ltr;text-align:left;unicode-bidi:normal;   /* textarea-র মতোই সব সময় LTR (বাম দিক থেকে)) */
+      font-family:var(--txt);line-height:1.95;font-size:var(--fs,20px);-webkit-text-size-adjust:100%}
+  #hl mark{color:transparent;background:var(--hl);border-radius:4px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+  #hl mark.w{background:var(--hlw)}
+  textarea::placeholder{color:var(--muted);opacity:.8}
+
+  dialog{border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--fg);max-width:460px;width:92vw;padding:18px;font-family:var(--ui);max-height:92dvh;overflow:auto}
+  dialog::backdrop{background:rgba(0,0,0,.45)}
+  dialog h3{margin:0 0 10px}
+  dialog label{display:block;margin:10px 0 3px;font-size:12px;color:var(--muted)}
+  dialog input[type=text],dialog input[type=password],dialog select{width:100%}
+  dialog .row{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+  dialog small{display:block;margin-top:4px;color:var(--muted);line-height:1.5}
+  dialog hr{border:0;border-top:1px solid var(--line);margin:14px 0 4px}
+  dialog input[type=number]{width:100%}
+  dialog textarea{height:auto;min-height:150px;width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;
+                  font-family:var(--ui);font-size:13px;line-height:1.6;resize:vertical;background:var(--panel);color:var(--fg)}
+  dialog .chk{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;color:var(--fg);cursor:pointer}
+  dialog .chk input{width:18px;height:18px;padding:0;flex:none}
+  .apiPick{width:100%;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;padding:12px 14px;margin-top:8px;text-align:left;white-space:normal}
+  .apiPick b{font-size:15px}
+  .apiPick .s{font-size:12px;color:var(--muted);line-height:1.5}
+  /* শোনার সার্ভিস বাছাই ডায়ালগ */
+  #dlgTts{max-width:520px}
+  #tsErr[hidden]{display:none}
+  .tsItem{border:1px solid var(--line);border-radius:12px;margin-top:8px;background:var(--panel);overflow:hidden}
+  .tsItem.sel{border-color:var(--pri);box-shadow:0 0 0 1px var(--pri) inset}
+  .tsPick{width:100%;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;padding:11px 13px;text-align:left;white-space:normal;
+          background:transparent;border:0;border-radius:0}
+  .tsPick:hover{background:var(--panel2)}
+  .tsPick b{font-size:15px;display:flex;align-items:center;gap:8px}
+  .tsPick .s{font-size:12px;color:var(--muted);line-height:1.5}
+  .tsDot{flex:none;width:14px;height:14px;border-radius:50%;border:2px solid var(--muted);display:inline-block}
+  .tsItem.sel .tsDot{border-color:var(--pri);background:radial-gradient(circle,var(--pri) 0 4px,transparent 5px)}
+  .tsTags{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+  .tsTag{font-size:11px;padding:1px 8px;border-radius:99px;background:var(--panel2);color:var(--muted);line-height:1.6}
+  .tsTag.ok{background:rgba(22,163,74,.16);color:var(--ok)}
+  .tsTag.warn{background:rgba(194,65,12,.14);color:var(--warn)}
+  .tsTag.err{background:rgba(220,38,38,.14);color:var(--err)}
+  .tsPanel{display:none;padding:2px 13px 12px;border-top:1px dashed var(--line)}
+  .tsItem.sel .tsPanel{display:block}
+  .tsPanel:empty{display:none!important}
+  /* বোতামের সারি নিচে আটকে থাকে: লম্বা তালিকায় স্ক্রল না করেই "শুনুন" চাপা যায় */
+  #dlgTts .row{position:sticky;bottom:-18px;background:var(--bg);padding:10px 0 2px;margin:10px 0 -2px;border-top:1px solid var(--line);z-index:2}
+  #toast{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);background:#222;color:#fff;padding:8px 14px;border-radius:10px;
+         font-size:13px;max-width:90vw;opacity:0;pointer-events:none;transition:opacity .2s;z-index:50}
+  #toast.show{opacity:1}
+  #toast.err{background:var(--err)}
+  /* কাস্টম লোডিং টোস্ট ("সেভ ও পরের"): ঘূর্ণি + ধাপের নাম + প্রগ্রেস বার */
+  #ltoast{position:fixed;left:50%;bottom:64px;transform:translate(-50%,8px);background:#222;color:#fff;padding:10px 16px 13px;border-radius:12px;
+          display:flex;align-items:center;gap:12px;min-width:260px;max-width:90vw;font-size:13px;line-height:1.45;overflow:hidden;
+          opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:51;box-shadow:0 6px 22px rgba(0,0,0,.35)}
+  #ltoast.show{opacity:1;transform:translate(-50%,0)}
+  #ltoast .lt-spin{flex:none;width:22px;height:22px;border-radius:50%;border:3px solid rgba(255,255,255,.28);border-top-color:#4ade80;animation:ltspin .8s linear infinite}
+  #ltoast .lt-txt{display:flex;flex-direction:column;min-width:0}
+  #ltoast .lt-txt b{font-weight:600}
+  #ltoast .lt-txt small{opacity:.75;font-size:11px}
+  #ltoast .lt-pct{flex:none;margin-left:auto;padding-left:10px;min-width:46px;text-align:right;font-size:15px;font-weight:700;color:#4ade80;font-variant-numeric:tabular-nums}
+  #ltoast .lt-bar{position:absolute;left:0;bottom:0;height:3px;width:0;background:#4ade80;transition:width .2s linear}
+  @keyframes ltspin{to{transform:rotate(360deg)}}
+
+  /* লাইটবক্স: ছবিতে ক্লিক করলে পপআপ, যেকোনো জায়গায় ক্লিক করলে বন্ধ */
+  #lb{position:fixed;inset:0;z-index:40;display:none;align-items:center;justify-content:center;
+      background:rgba(0,0,0,.88);cursor:zoom-out;overflow:auto;touch-action:pinch-zoom pan-x pan-y}
+  #lb.open{display:flex}
+  #lbImg{max-width:96vw;max-height:94dvh;object-fit:contain;display:block;margin:auto;
+         box-shadow:0 4px 30px rgba(0,0,0,.6);background:#fff}
+  #lbTitle{position:fixed;top:10px;left:12px;color:#fff;font-size:13px;background:rgba(0,0,0,.5);padding:4px 10px;border-radius:8px;pointer-events:none}
+  #lbDl{position:fixed;top:8px;right:12px;width:42px;height:42px;padding:0;
+        border-radius:50%;background:rgba(255,255,255,.92);color:#111;border:0;cursor:pointer;z-index:41}
+  #lbDl .i{width:20px;height:20px}
+
+  /* view.html: সেটিংস ও Gemini API বাটন শুধু অ্যাডমিনের জন্য দৃশ্যমান */
+  body:not(.is-admin) #btnSettings,body:not(.is-admin) #apiBox,body:not(.is-admin) #btnAutoApi,
+  body:not(.is-admin) #dlg,body:not(.is-admin) #dlgApi,body:not(.is-admin) #dlgCfg{display:none!important}

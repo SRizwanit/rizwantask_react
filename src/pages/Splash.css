@@ -1,0 +1,77 @@
+
+:root{--g1:#f7e2a0;--g2:#d9ab43;--g3:#a8761f}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{
+  background:radial-gradient(90% 60% at 50% 38%,#0f5a47 0%,#083a2f 46%,#041a15 100%);
+  color:#eafbf4;font-family:"Anek Bangla","Noto Sans Bengali",system-ui,sans-serif;
+  display:flex;align-items:center;justify-content:center;
+  padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0);
+  transition:opacity .45s ease,transform .45s ease}
+body.out{opacity:0;transform:scale(1.03)}
+
+/* নকশা: ধীরে ভেসে চলা ইসলামি গোলাপ-নকশা ও চাঁদ */
+.lattice{position:fixed;inset:-120px;z-index:0;opacity:.55;pointer-events:none;animation:drift 70s linear infinite;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23f2d27a' stroke-opacity='.17' stroke-width='1.1'%3E%3Cg transform='translate(30 30)'%3E%3Ccircle r='2.6'/%3E%3Cellipse rx='3' ry='10.5'/%3E%3Cellipse rx='3' ry='10.5' transform='rotate(45)'/%3E%3Cellipse rx='3' ry='10.5' transform='rotate(90)'/%3E%3Cellipse rx='3' ry='10.5' transform='rotate(135)'/%3E%3Ccircle r='14.5'/%3E%3C/g%3E%3Cg transform='translate(90 90)'%3E%3Ccircle r='2.6'/%3E%3Cellipse rx='3' ry='10.5'/%3E%3Cellipse rx='3' ry='10.5' transform='rotate(45)'/%3E%3Cellipse rx='3' ry='10.5' transform='rotate(90)'/%3E%3Cellipse rx='3' ry='10.5' transform='rotate(135)'/%3E%3Ccircle r='14.5'/%3E%3C/g%3E%3Cg transform='translate(90 30) rotate(-20)'%3E%3Cpath d='M3 -8.5 A9 9 0 1 0 3 8.5 A9.5 9.5 0 1 1 3 -8.5z'/%3E%3Cpath d='M13 -3 l0 0' /%3E%3C/g%3E%3Cg transform='translate(30 90) rotate(160)'%3E%3Cpath d='M3 -8.5 A9 9 0 1 0 3 8.5 A9.5 9.5 0 1 1 3 -8.5z'/%3E%3Cpath d='M13 -3 l0 0' /%3E%3C/g%3E%3Cpath d='M52 8c6 6 6 14 0 20M68 8c-6 6-6 14 0 20M52 92c6 6 6 14 0 20M68 92c-6 6-6 14 0 20'/%3E%3C/g%3E%3C/svg%3E");background-size:120px 120px}
+@keyframes drift{to{transform:translate(120px,120px)}}
+.vig{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(70% 55% at 50% 45%,transparent 30%,rgba(2,12,9,.75))}
+#tw{position:fixed;inset:0;z-index:1;pointer-events:none}
+#tw i{position:absolute;display:block;background:var(--g1);border-radius:50%;opacity:0;animation:twk var(--d) ease-in-out var(--l) infinite}
+#tw i::before,#tw i::after{content:"";position:absolute;left:50%;top:50%;background:var(--g1);transform:translate(-50%,-50%)}
+#tw i::before{width:1px;height:700%}#tw i::after{width:700%;height:1px}
+@keyframes twk{0%,100%{opacity:0;transform:scale(.3)}50%{opacity:.95;transform:scale(1)}}
+
+.bsm{margin:0 0 18px;font-family:"Amiri","Noto Naskh Arabic","Traditional Arabic",serif;font-size:clamp(22px,6vw,30px);line-height:1.5;color:var(--g1);direction:rtl;opacity:0;animation:fade 1.2s .3s forwards;text-shadow:0 0 18px rgba(242,210,122,.35)}
+.stage{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px;width:100%}
+
+/* লোগো */
+.mk{position:relative;width:min(46vw,168px);aspect-ratio:1;margin-bottom:26px}
+.halo{position:absolute;inset:-26%;border-radius:50%;
+  background:radial-gradient(circle,rgba(242,210,122,.32),rgba(242,210,122,0) 62%);opacity:0;animation:fade 1.2s .1s forwards,breathe 3.4s 1.3s ease-in-out infinite}
+.ring{position:absolute;inset:-14%;opacity:0;animation:fade 1s .2s forwards,spin 28s linear infinite}
+.ring svg{width:100%;height:100%}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes breathe{50%{transform:scale(1.1);opacity:.7}}
+@keyframes fade{to{opacity:1}}
+.mark{position:relative;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 6px 22px rgba(0,0,0,.45))}
+.mark .d{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw var(--t,1.2s) cubic-bezier(.6,.1,.2,1) var(--s,0s) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.mark .plate{fill:rgba(242,210,122,.08);opacity:0;animation:fade .8s 1.4s forwards}
+.mark .pg{fill:rgba(234,251,244,.1);opacity:0;animation:fade .7s 1.5s forwards}
+.mark .cr{fill:#f2d27a;opacity:0;animation:fade .8s 1.6s forwards}
+.mark .sp{fill:#fff7d6;transform-box:fill-box;transform-origin:center;opacity:0;animation:pop .9s 2.1s cubic-bezier(.3,1.6,.5,1) forwards,twinkle 2.6s 2.9s ease-in-out infinite}
+@keyframes pop{from{opacity:0;transform:scale(0) rotate(-90deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes twinkle{50%{transform:scale(.6) rotate(20deg);opacity:.6}}
+
+/* নাম */
+h1{margin:0;font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif;font-weight:700;
+  font-size:clamp(40px,11vw,62px);line-height:1.05;letter-spacing:.01em;display:flex}
+h1 span{display:inline-block;opacity:0;transform:translateY(18px);
+  background:linear-gradient(100deg,var(--g3) 0%,var(--g1) 28%,#fffbe8 50%,var(--g2) 72%,var(--g3) 100%);background-size:260% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:rise .7s cubic-bezier(.2,.9,.3,1) calc(1.15s + var(--n)*.06s) forwards,sheen 3.4s linear 2.2s infinite}
+@keyframes rise{to{opacity:1;transform:none}}
+@keyframes sheen{from{background-position:130% 0}to{background-position:-130% 0}}
+.tag{margin:10px 0 0;font-size:15px;color:#a9d6c6;letter-spacing:.04em;opacity:0;animation:fade .8s 1.9s forwards}
+.rule{display:flex;align-items:center;gap:10px;margin:16px 0 0;opacity:0;animation:fade .8s 2s forwards}
+.rule b{display:block;width:54px;height:1px;background:linear-gradient(90deg,transparent,var(--g2))}
+.rule b:last-child{transform:scaleX(-1)}
+.rule svg{width:20px;height:20px;fill:var(--g1)}
+
+/* লোডিং */
+.load{margin-top:34px;width:min(62vw,230px);opacity:0;animation:fade .6s .6s forwards}
+.rail{position:relative;height:5px;border-radius:99px;background:rgba(242,210,122,.16);overflow:hidden;box-shadow:inset 0 0 0 1px rgba(242,210,122,.2)}
+.fill{position:absolute;inset:0;width:0;border-radius:99px;background:linear-gradient(90deg,var(--g3),var(--g1));animation:load 2.3s cubic-bezier(.45,.05,.25,1) .6s forwards}
+.fill::after{content:"";position:absolute;top:0;bottom:0;right:0;width:46px;background:linear-gradient(90deg,transparent,#fffbe8);filter:blur(1px)}
+@keyframes load{0%{width:0}35%{width:38%}70%{width:72%}100%{width:100%}}
+.lt{display:flex;justify-content:space-between;margin-top:10px;font-size:12.5px;color:#8fc4b1}
+#pc{font-variant-numeric:tabular-nums;color:var(--g1);font-weight:600}
+.dots i{display:inline-block;animation:dot 1.2s infinite both}.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
+@keyframes dot{0%,80%,100%{opacity:.2}40%{opacity:1}}
+
+@media(prefers-reduced-motion:reduce){
+  .lattice,.halo,.ring,#tw i,h1 span,.mark .sp,.dots i{animation:none!important}
+  .mark .d{animation:none;stroke-dashoffset:0}
+  .bsm,.halo,.ring,.mark .plate,.mark .pg,.mark .sp,h1 span,.tag,.rule,.load{opacity:1;transform:none}
+  .fill{animation:none;width:100%}
+}
