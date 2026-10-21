@@ -1,7 +1,7 @@
 name: Rename Folder Case
 
 on:
-  workflow_dispatch: # এটি গিটহাব পেজ থেকে ম্যানুয়ালি রান করানোর অপশন দেবে
+  workflow_dispatch:
 
 jobs:
   rename:
@@ -17,14 +17,14 @@ jobs:
 
       - name: Fix folder case sensitivity
         run: |
-          # গিট যেন কেস সেন্সিটিভিটি (বড়/ছোট হাতের অক্ষর) পরিবর্তন ধরতে পারে
+          # কেস সেন্সিটিভিটি অন করা
           git config core.ignorecase false
           
-          # ফোল্ডারটি রিনেইম করার জন্য গিট ক্যাশ থেকে সাময়িকভাবে রিমুভ করে আবার এড করা হচ্ছে
-          git mv -f rizwantask_react/src/pages/Admin rizwantask_react/src/pages/admin_temp
-          git mv -f rizwantask_react/src/pages/admin_temp rizwantask_react/src/pages/admin
+          # বর্তমান ফোল্ডারটি রিনেইম করার সঠিক কমান্ড (সাময়িক নাম দিয়ে)
+          git mv rizwantask_react/src/pages/Admin rizwantask_react/src/pages/admin_temp
+          git mv rizwantask_react/src/pages/admin_temp rizwantask_react/src/pages/admin
           
-          # পরিবর্তনগুলো কমিট ও পুশ করা
-          git add .
+          # কমিট ও পুশ করা
+          git add -A
           git commit -m "Fix: Rename Admin folder to admin"
           git push
