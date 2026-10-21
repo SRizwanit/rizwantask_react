@@ -1,5 +1,4 @@
-import { useEffect, useLayoutEffect } from 'react';
-import runLegacy from './runLegacy.js';
+import { useLayoutEffect } from 'react';
 import commonCss from '../styles/common.css?inline';
 import themeCss from '../styles/theme.css?inline';
 
@@ -19,10 +18,9 @@ export function usePageMeta({ title, themeColor, viewport }) {
   }, [title, themeColor, viewport]);
 }
 
-/* পেইজ-ভিত্তিক স্টাইল (<style> পেইজ আনমাউন্ট হলে চলে যায়) + মেটা + (থাকলে) পুরনো পেইজ-লজিক */
-export default function PageShell({ title, themeColor, viewport, sheets = ['common', 'theme'], css = '', cssFirst = false, logic, children }) {
+/* পেইজ-ভিত্তিক স্টাইল (<style> পেইজ আনমাউন্ট হলে চলে যায়) + মেটা */
+export default function PageShell({ title, themeColor, viewport, sheets = ['common', 'theme'], css = '', cssFirst = false, children }) {
   usePageMeta({ title, themeColor, viewport });
-  useEffect(() => (logic ? runLegacy(logic) : undefined), []); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <>
       {/* cssFirst: পেইজের নিজস্ব স্টাইল আগে, তারপর theme.css (view.html-এ এই ক্রমই ছিল) */}
