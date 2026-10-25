@@ -144,6 +144,16 @@ export default function BooksTab({ d, openKey, active }) {
   /* ---- কার্ডের বোতাম ---- */
   const act = async (a, bk) => {
     if (a === 'edit') openBook(bk);
+    else if (a === 'toggle') {                       // কিতাব লুকান / দেখান
+      const hide = !bk.hidden;
+      try {
+        await App.sb.patch('books?id=eq.' + enc(bk.id), { hidden: hide });
+        d.patchBook(bk.id, { hidden: hide });
+        toast(hide ? '"' + bk.name + '" লুকানো হয়েছে — ইউজাররা আর দেখবে না' : '"' + bk.name + '" আবার দেখানো হচ্ছে');
+      } catch (x) {
+        toast(/hidden/i.test(x.message) ? 'Supabase SQL Editor-এ চালান: alter table books add column if not exists hidden boolean not null default false;' : x.message, true);
+      }
+    }
     else if (a === 'count') {
       setCounting(String(bk.id));
       try {
@@ -176,13 +186,13 @@ export default function BooksTab({ d, openKey, active }) {
         {books.length ? books.map((b) => {
           const x = bst[String(b.id)] || { n: 0, a: 0, p: 0, c: 0 }, tot = Number(b.total_pages) || 0, info = getRun(b);
           return (
-            <div className="li" key={b.id}>
+            <div className="li" key={b.id} style={b.hidden ? { opacity: 0.6 } : undefined}>
               <div className="row" style={{ flexWrap: 'nowrap' }}>
                 <div style={{ width: '44px', height: '58px', borderRadius: '6px', overflow: 'hidden', background: 'var(--panel2)', flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)' }}>
                   {b.cover_url ? <img src={b.cover_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Icon name="book" />}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <b>{b.name}</b>
+                  <b>{b.name}</b>{b.hidden ? <span className="meta" style={{ marginLeft: '8px', fontWeight: 700 }}>🚫 লুকানো</span> : null}
                   <div className="meta">
                     {b.author || ''}<br />{eff(S, b, 'github_username')}/{eff(S, b, 'repo_name')}{(!b.github_username && !b.repo_name) ? ' (ডিফল্ট)' : ''} &middot; {b.folder || b.name}_{S.pages_dir || DEF.pages_dir}
                     {b.pdf_url ? <><br /><a href={b.pdf_url} target="_blank" rel="noopener noreferrer">PDF লিংক</a></> : null}
@@ -199,6 +209,7 @@ export default function BooksTab({ d, openKey, active }) {
               <div className="run">{info ? <RunBox s={runs[b.id]} /> : null}</div>
               <div className="row">
                 <button className="sm" title="GitHub ফোল্ডার থেকে মোট পেইজ গুনুন" disabled={counting === String(b.id)} onClick={() => act('count', b)}><Ic n="refresh" />পেইজ গণনা</button>
+                <button className="sm" title={b.hidden ? 'ইউজারদের কাছে আবার দেখান' : 'ইউজারদের কাছ থেকে লুকান'} onClick={() => act('toggle', b)}><Ic n={b.hidden ? 'check' : 'ban'} />{b.hidden ? 'দেখান' : 'লুকান'}</button>
                 <button className="sm" onClick={() => act('edit', b)}><Ic n="edit" />এডিট</button>
                 {b.pdf_url ? <button className="sm" title="পিডিএফ থেকে ছবি তৈরির workflow আবার চালান" onClick={() => act('run', b)}><Icon name="play" />ছবি তৈরি</button> : null}
                 <button className="sm danger" onClick={() => act('del', b)}><Ic n="trash" />ডিলিট</button>
