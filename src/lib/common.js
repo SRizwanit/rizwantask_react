@@ -1,9 +1,10 @@
 /* Shared client: Supabase REST, session, phone validation, PIN hashing, device id, UI helpers.
    (common.js থেকে ES module-এ রূপান্তরিত; আগের মতো window.App-ও সেট হয় — পুরনো পেইজ-লজিক সেটাই ব্যবহার করে।) */
 import { go, BASE } from './nav.js';
-const SB_URL=import.meta.env.VITE_SUPABASE_URL||'https://opluyjvhaibcznaidiod.supabase.co';
-const SB_KEY=import.meta.env.VITE_SUPABASE_KEY||'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9wbHV5anZoYWliY3puYWlkaW9kIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MjQ3ODcyMSwiZXhwIjoyMTA4MDU0NzIxfQ.3tCEEoIuyvrPt7a_9RNYzsjNwijAxA7ixQVLRpk-Blk';
-const ADMIN_PHONE=import.meta.env.VITE_ADMIN_PHONE||'01714656343', ADMIN_WA=import.meta.env.VITE_ADMIN_WA||'8801714656343';
+const SB_URL=import.meta.env.VITE_SUPABASE_URL;
+const SB_KEY=import.meta.env.VITE_SUPABASE_KEY;
+const ADMIN_PHONE=import.meta.env.VITE_ADMIN_PHONE, ADMIN_WA=import.meta.env.VITE_ADMIN_WA;
+if(!SB_URL||!SB_KEY) console.error('VITE_SUPABASE_URL / VITE_SUPABASE_KEY সেট করা নেই (.env, GitHub Secrets বা Vercel Environment Variables দেখুন)');
 const SK='kp_session_v1', DK='kp_device_v1';
 const enc=encodeURIComponent;
 
