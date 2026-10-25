@@ -63,7 +63,7 @@ export default function View() {
       try { s = (await App.sb.get('app_settings?id=eq.1&limit=1'))[0] || {}; } catch (e) { /* ignore */ }
       const { CK, DK } = keysFor(u.id, b.id);
       await restoreFromExt([CK, DK]);                           // এক্সটেনশন স্টোরেজ থেকে কী/টোকেন/খসড়া ফেরানো
-      if (!dead) setCtx({ uid: u.id, isAdmin: App.isAdminPhone(u.phone), book: b, settings: s });
+      if (!dead) setCtx({ uid: u.id, uname: u.full_name || u.name || '', isAdmin: App.isAdminPhone(u.phone), book: b, settings: s });
     })();
     return () => { dead = true; };
   }, []);
@@ -120,6 +120,37 @@ function ViewPage({ ctx }) {
   if (!toasterRef.current) toasterRef.current = createToaster();
   const T = toasterRef.current, toast = T.toast;
   useEffect(() => () => T.dispose(), [T]);
+
+  /* ---------- "কাজ চলছে" সংকেত: এই কিতাবে কাজ করার সময় প্রতি ২০ সেকেন্ডে জানায়; বের হলে ছেড়ে দেয়।
+     অন্য ইউজার Task পেজে কিতাবটিতে ক্লিক করলে "(নাম) কাজ করছেন" ডায়ালগ দেখে। অ্যাডমিন লক ধরে না।
+     (Supabase-এ book_locks টেবিল ও book_lock_* ফাংশন না থাকলে চুপচাপ উপেক্ষা করে — কাজ ব্যাহত হয় না) ---------- */
+  useEffect(() => {
+    if (IS_ADMIN) return undefined;
+    let alive = true, held = false;
+    const args = { p_book: BOOK_ID, p_user: String(ME) };
+    const beat = async () => {
+      try {
+        const holder = await App.sb.post('rpc/book_lock_beat', { ...args, p_name: ctx.uname || '' });
+        if (!alive) return;
+        if (holder) {                                   // অন্য কেউ এই কিতাবে সক্রিয় (সরাসরি লিংকে ঢুকলে)
+          if (!held) { alive = false; window.alert(holder + ' এই কিতাবটির কাজ করছেন...\nউনি কাজ অফ করলে আপনি করতে পারবেন।'); navTo('task', true); }
+          return;
+        }
+        held = true;
+      } catch (e) { /* উপেক্ষা */ }
+    };
+    const release = () => { App.sb.post('rpc/book_lock_release', args).catch(() => {}); };
+    const onVis = () => { if (document.visibilityState === 'visible') beat(); };
+    beat();
+    const t = setInterval(beat, 20000);
+    document.addEventListener('visibilitychange', onVis);
+    window.addEventListener('pagehide', release);
+    return () => {
+      alive = false; clearInterval(t);
+      document.removeEventListener('visibilitychange', onVis); window.removeEventListener('pagehide', release);
+      if (held) release();
+    };
+  }, [ME, BOOK_ID, IS_ADMIN]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ---------- কনফিগ (সংরক্ষিত; বদলালেই localStorage + এক্সটেনশন স্টোরেজে) ---------- */
   const cfgRef = useRef(null);

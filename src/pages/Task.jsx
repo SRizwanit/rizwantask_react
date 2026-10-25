@@ -56,10 +56,13 @@ export default function Task() {
   const rankCache = useRef({}), rankReq = useRef(0), rankPRef = useRef('day');
   const allNotices = useRef([]), nListRef = useRef([]); nListRef.current = nList;
   const nav = useRef(null), glDlg = useRef(null), rqDlg = useRef(null), nDlg = useRef(null), guide = useRef(null);
+  const lockDlg = useRef(null), lockBusy = useRef(false);            // "কাজ চলছে" ডায়ালগ (অন্য ইউজার কিতাবটি খুলে রাখলে)
+  const [lockInfo, setLockInfo] = useState({ name: '', book: '' });
   const repin = usePinNav(nav);
 
   const isAdmin = !!me && App.isAdminPhone(me.phone);
   const booksById = useMemo(() => byId(books), [books]);
+  const shownBooks = useMemo(() => books.filter((b) => !b.hidden), [books]);   // অ্যাডমিন যে কিতাব লুকিয়েছে তা তালিকায় দেখাবে না (হিসাবের জন্য booksById-এ সব কিতাব থাকে)
   const sum = useMemo(() => (fin.ready ? App.summarize(fin.proofs, booksById, fin.S, fin.pays) : null), [fin, booksById]);
   const rateOf = useCallback((b) => App.rateOf(b, fin.S), [fin.S]);
   const resume = me ? getResume(me.id) : null;   // view.html প্রতিবার পেইজ বদলালে localStorage-এ মনে রাখে; প্রতি রেন্ডারে পড়ি
@@ -236,9 +239,30 @@ export default function Task() {
     goalRef.current = g; setGoal(g); try { localStorage.setItem(goalKey(me.id), String(g)); } catch (e) { /* ignore */ }
     glDlg.current.close(); toast('দৈনিক লক্ষ্য: ' + bn(g) + ' পেইজ');
   };
+  /* কিতাব খোলার আগে: লুকানো কিতাব আটকানো + অন্য কেউ এখন ওই কিতাবের কাজ করছে কিনা যাচাই (অ্যাডমিন সবসময় খুলতে পারবে) */
+  const openBook = async (id, stem) => {
+    if (lockBusy.current) return;
+    lockBusy.current = true;
+    try {
+      const bk = booksById[String(id)];
+      if (bk && bk.hidden && !isAdmin) { toast('এই কিতাবটি এখন পাওয়া যাচ্ছে না', true); return; }
+      if (!isAdmin && me) {
+        try {
+          const r = await App.sb.post('rpc/book_lock_of', { p_book: String(id) });
+          const l = Array.isArray(r) ? r[0] : null;
+          if (l && String(l.holder_id) !== String(me.id)) {
+            setLockInfo({ name: l.holder_name || 'অন্য একজন ইউজার', book: bk ? bk.name : '' });
+            if (lockDlg.current) lockDlg.current.showModal();
+            return;
+          }
+        } catch (e) { /* ফাংশন/টেবিল না থাকলে বা নেটওয়ার্ক সমস্যায় আটকাবে না — কিতাব খুলে দেবে */ }
+      }
+      go('view?book=' + enc(id) + (stem ? '&page=' + enc(stem) : ''));
+    } finally { lockBusy.current = false; }
+  };
   const openResume = () => {
     const rt = resumeTarget(getResume(me.id), booksById, fin.proofs); if (!rt) return;
-    go('view?book=' + enc(rt.bid) + (rt.stem ? '&page=' + enc(rt.stem) : ''));
+    openBook(rt.bid, rt.stem);
   };
 
   /* ---------- পেমেন্ট রিকোয়েস্ট ---------- */
@@ -299,8 +323,8 @@ export default function Task() {
             <button id="bReload" className="sm" title="রিফ্রেশ" onClick={() => { load(); loadCount(); loadNotices(); }}><span><Icon name="refresh" /></span></button>
           </div>
           <div id="noticeBar"></div>
-          <BookGrid status={booksStatus} spinning={spinning} books={books} query={query} bookCounts={bookCounts}
-            byBook={sum ? sum.byBook : {}} resume={resume} rateOf={rateOf} onOpen={(id) => go('view?book=' + enc(id))} />
+          <BookGrid status={booksStatus} spinning={spinning} books={shownBooks} query={query} bookCounts={bookCounts}
+            byBook={sum ? sum.byBook : {}} resume={resume} rateOf={rateOf} onOpen={(id) => openBook(id)} />
         </section>
 
         {/* PAYMENT pane */}
@@ -321,6 +345,15 @@ export default function Task() {
       <RequestDialog dlgRef={rqDlg} info={rq} amt={rqAmt} onAmt={setRqAmt} err={rqErr} busy={rqSending} onCancel={() => rqDlg.current.close()} onSend={onSend} />
       <NoticeDialog dlgRef={nDlg} list={nList} idx={nIdx} onIdx={setNIdx} onClose={() => nDlg.current.close()} onClosed={onNoticeClosed} />
       <GuideDialog ref={guide} onClosed={onGuideClosed} />
+      <dialog id="lockDlg" ref={lockDlg}>
+        <h3>কিতাবটি এখন ব্যবহৃত হচ্ছে</h3>
+        <p className="hint" style={{ margin: '0 0 12px', fontSize: '15px', lineHeight: 1.8 }}>
+          <b>{lockInfo.name}</b> {lockInfo.book ? '"' + lockInfo.book + '" ' : ''}কিতাবটির কাজ করছেন...<br />উনি কাজ অফ করলে আপনি করতে পারবেন।
+        </p>
+        <div className="acts">
+          <button id="lockOk" className="primary" onClick={() => lockDlg.current.close()}>ঠিক আছে</button>
+        </div>
+      </dialog>
     </PageShell>
   );
 }
