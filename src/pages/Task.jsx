@@ -58,6 +58,8 @@ export default function Task() {
   const nav = useRef(null), glDlg = useRef(null), rqDlg = useRef(null), nDlg = useRef(null), guide = useRef(null);
   const lockDlg = useRef(null), lockBusy = useRef(false);            // "কাজ চলছে" ডায়ালগ (অন্য ইউজার কিতাবটি খুলে রাখলে)
   const [lockInfo, setLockInfo] = useState({ name: '', book: '' });
+  const hidDlg = useRef(null);                                       // "অ্যাডমিন কিতাবটির এক্সেস সাময়িক বন্ধ রেখেছেন" ডায়ালগ
+  const [hiddenInfo, setHiddenInfo] = useState({ book: '' });
   const repin = usePinNav(nav);
 
   const isAdmin = !!me && App.isAdminPhone(me.phone);
@@ -245,7 +247,11 @@ export default function Task() {
     lockBusy.current = true;
     try {
       const bk = booksById[String(id)];
-      if (bk && bk.hidden && !isAdmin) { toast('এই কিতাবটি এখন পাওয়া যাচ্ছে না', true); return; }
+      if (bk && bk.hidden && !isAdmin) {   // অ্যাডমিন কিতাবটি লুকিয়েছে (চালিয়ে যান বাটন থেকেও এখানে আসে) → কাস্টম ডায়ালগ
+        setHiddenInfo({ book: bk.name || '' });
+        if (hidDlg.current) hidDlg.current.showModal();
+        return;
+      }
       if (!isAdmin && me) {
         try {
           const r = await App.sb.post('rpc/book_lock_of', { p_book: String(id) });
@@ -345,6 +351,15 @@ export default function Task() {
       <RequestDialog dlgRef={rqDlg} info={rq} amt={rqAmt} onAmt={setRqAmt} err={rqErr} busy={rqSending} onCancel={() => rqDlg.current.close()} onSend={onSend} />
       <NoticeDialog dlgRef={nDlg} list={nList} idx={nIdx} onIdx={setNIdx} onClose={() => nDlg.current.close()} onClosed={onNoticeClosed} />
       <GuideDialog ref={guide} onClosed={onGuideClosed} />
+      <dialog id="hidDlg" ref={hidDlg}>
+        <h3>কিতাবটি সাময়িক বন্ধ আছে</h3>
+        <p className="hint" style={{ margin: '0 0 12px', fontSize: '15px', lineHeight: 1.8 }}>
+          {hiddenInfo.book ? <b>"{hiddenInfo.book}"</b> : 'এই'} কিতাবটির এক্সেস অ্যাডমিন সাময়িক বন্ধ রেখেছেন।<br />আপনি অন্য কিতাবের কাজ করতে পারেন।
+        </p>
+        <div className="acts">
+          <button id="hidOk" className="primary" onClick={() => hidDlg.current.close()}>ঠিক আছে</button>
+        </div>
+      </dialog>
       <dialog id="lockDlg" ref={lockDlg}>
         <h3>কিতাবটি এখন ব্যবহৃত হচ্ছে</h3>
         <p className="hint" style={{ margin: '0 0 12px', fontSize: '15px', lineHeight: 1.8 }}>

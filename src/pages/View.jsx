@@ -60,7 +60,11 @@ export default function View() {
       let b = null, s = {};
       try { b = (await App.sb.get('books?id=eq.' + encodeURIComponent(id) + '&limit=1'))[0]; } catch (e) { /* ignore */ }
       if (!b) { navTo('task', true); return; }
-      try { s = (await App.sb.get('app_settings?id=eq.1&limit=1'))[0] || {}; } catch (e) { /* ignore */ }
+      if (b.hidden && !App.isAdminPhone(u.phone)) {             // অ্যাডমিন কিতাবটি লুকিয়েছে: সরাসরি লিংক/বুকমার্ক দিয়েও ইউজার ঢুকতে পারবে না (অ্যাডমিন পারবে)
+        window.alert('"' + (b.name || '') + '" কিতাবটির এক্সেস অ্যাডমিন সাময়িক বন্ধ রেখেছেন।\nআপনি অন্য কিতাবের কাজ করতে পারেন।');
+        navTo('task', true); return;
+      }
+      try { s =(await App.sb.get('app_settings?id=eq.1&limit=1'))[0] || {}; } catch (e) { /* ignore */ }
       const { CK, DK } = keysFor(u.id, b.id);
       await restoreFromExt([CK, DK]);                           // এক্সটেনশন স্টোরেজ থেকে কী/টোকেন/খসড়া ফেরানো
       if (!dead) setCtx({ uid: u.id, uname: u.full_name || u.name || '', isAdmin: App.isAdminPhone(u.phone), book: b, settings: s });
