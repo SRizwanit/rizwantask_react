@@ -64,7 +64,10 @@ export default function Task() {
 
   const isAdmin = !!me && App.isAdminPhone(me.phone);
   const booksById = useMemo(() => byId(books), [books]);
-  const shownBooks = useMemo(() => books.filter((b) => !b.hidden), [books]);   // অ্যাডমিন যে কিতাব লুকিয়েছে তা তালিকায় দেখাবে না (হিসাবের জন্য booksById-এ সব কিতাব থাকে)
+  /* অ্যাডমিন যে কিতাব লুকিয়েছে তা তালিকায় দেখাবে না (হিসাবের জন্য booksById-এ সব কিতাব থাকে)।
+     নতুন কিতাব তখনই দেখাবে যখন ছবি তৈরি হয়ে পেইজ গণনা সম্পন্ন (total_pages > ০) হয়েছে।
+     আগের কিতাব, যেগুলোতে ইতিমধ্যে প্রুফড পেইজ আছে, সেগুলো মোট পেইজ না থাকলেও দেখাবে (যাতে পুরনো কাজ হারিয়ে না যায়)। */
+  const shownBooks = useMemo(() => books.filter((b) => !b.hidden && (Number(b.total_pages) > 0 || (bookCounts[String(b.id)] || 0) > 0)), [books, bookCounts]);
   const sum = useMemo(() => (fin.ready ? App.summarize(fin.proofs, booksById, fin.S, fin.pays) : null), [fin, booksById]);
   const rateOf = useCallback((b) => App.rateOf(b, fin.S), [fin.S]);
   const resume = me ? getResume(me.id) : null;   // view.html প্রতিবার পেইজ বদলালে localStorage-এ মনে রাখে; প্রতি রেন্ডারে পড়ি
