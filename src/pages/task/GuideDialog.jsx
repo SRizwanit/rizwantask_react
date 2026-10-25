@@ -42,7 +42,7 @@ const GuideDialog = forwardRef(function GuideDialog({ onClosed }, ref) {
       </div>
       <div className="dots" id="gDots">{GUIDE.map((_, i) => <i key={i} className={i === gI ? 'on' : ''}></i>)}</div>
       <div className="acts">
-        <button id="gSkip" hidden={lastStep} onClick={close}>বাদ দিন</button>
+        <button id="gSkip" hidden={lastStep} onClick={close}>পরে দেখব</button>
         <button id="gPrev" hidden={gI === 0} onClick={() => setGI((i) => Math.max(0, i - 1))}>আগের</button>
         <button id="gNext" className="primary" onClick={() => { if (lastStep) close(); else setGI((i) => i + 1); }}>{lastStep ? 'শুরু করি' : 'পরের'}</button>
       </div>
