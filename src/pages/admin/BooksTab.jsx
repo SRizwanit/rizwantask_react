@@ -31,10 +31,14 @@ function RunBox({ s }) {
   );
 }
 
-const blank = () => ({ name: '', author: '', cover: '', pdf: '', rate: '', tot: '', gu: '', repo: '', br: '', fold: '', run: true, split: true });
+/* ---- ফিল্টার ও সাজানোর তালিকা ---- */
+const FLT = [['all', 'সব'], ['hidden', 'লুকানো'], ['notshown', 'Task-এ দেখাচ্ছে না'], ['running', 'ছবি তৈরি চলছে'], ['done', 'ছবি তৈরি সম্পন্ন'], ['failed', 'ব্যর্থ / বাতিল']];
+const SORTS = [['new', 'নতুন আগে'], ['old', 'পুরনো আগে'], ['name', 'নাম (অ–ঔ / A–Z)'], ['prog_desc', 'অগ্রগতি: বেশি আগে'], ['prog_asc', 'অগ্রগতি: কম আগে'], ['left_desc', 'বাকি পেইজ: বেশি আগে'], ['left_asc', 'বাকি পেইজ: কম আগে']];
+
+const blank = () => ({ name: '', author: '', cover: '', pdf: '', rate: '', tot: '', gu: '', repo: '', br: '', fold: '', run: true, split: false });
 const fromBook = (b) => ({
   name: b.name || '', author: b.author || '', cover: b.cover_url || '', pdf: b.pdf_url || '', rate: b.page_rate == null ? '' : b.page_rate, tot: b.total_pages == null ? '' : b.total_pages,
-  gu: b.github_username || '', repo: b.repo_name || '', br: b.branch || '', fold: b.folder || '', run: false, split: getSplitPref()
+  gu: b.github_username || '', repo: b.repo_name || '', br: b.branch || '', fold: b.folder || '', run: false, split: false
 });
 
 /* ---- JSON ইমপোর্ট: ফাইল পার্স করে books টেবিলের row বানায় ---- */
@@ -77,9 +81,22 @@ export default function BooksTab({ d, openKey, active }) {
   /* JSON ইমপোর্ট স্টেট */
   const [impOpen, setImpOpen] = useState(false), [impRows, setImpRows] = useState([]), [impInfo, setImpInfo] = useState(null), [impErr, setImpErr] = useState('');
   const [impBusy, setImpBusy] = useState(false), [impProg, setImpProg] = useState(''), [impFile, setImpFile] = useState('');
-  const [impCount, setImpCount] = useState(true), [impRun, setImpRun] = useState(false), [impSplit, setImpSplit] = useState(getSplitPref());
+  const [impCount, setImpCount] = useState(true), [impRun, setImpRun] = useState(false), [impSplit, setImpSplit] = useState(false);
   const runsRef = useRef({}), runsLS = useRef(readRunsLS()), pollT = useRef(0), activeRef = useRef(active); activeRef.current = active;
   const autoDone = useRef({}), fileRef = useRef(null);
+  /* সার্চ, ফিল্টার ও সাজানো */
+  const [query, setQuery] = useState(''), [flt, setFlt] = useState('all'), [sortBy, setSortBy] = useState('new');
+  /* একাধিক কিতাব সিলেক্ট করে বাল্ক অ্যাকশন (ডিলিট / লুকান-দেখান / রেট / পেইজ গণনা / ছবি তৈরি) */
+  const [selMode, setSelMode] = useState(false), [sel, setSel] = useState({}), [bulkBusy, setBulkBusy] = useState(false);
+  const [rateOpen, setRateOpen] = useState(false), [rateVal, setRateVal] = useState(''), [rateErr, setRateErr] = useState(''), [rateList, setRateList] = useState([]);
+  const [runOpen, setRunOpen] = useState(false), [runList, setRunList] = useState([]), [runSplit, setRunSplit] = useState(false), [runErr, setRunErr] = useState('');
+  const toggleSel = (id) => setSel((o) => { const n = { ...o }; const k = String(id); if (n[k]) delete n[k]; else n[k] = true; return n; });
+  const exitSel = () => { setSelMode(false); setSel({}); };
+  /* "সব সিলেক্ট" শুধু এখন যেগুলো দেখা যাচ্ছে (সার্চ/ফিল্টারের পর) সেগুলোতে কাজ করে */
+  const selectAll = () => {
+    const allSel = shown.length > 0 && shown.every((b) => sel[String(b.id)]);
+    setSel((o) => { const n = { ...o }; shown.forEach((b) => { if (allSel) delete n[String(b.id)]; else n[String(b.id)] = true; }); return n; });
+  };
   const set = (k) => (e) => { const v = e.target.type === 'checkbox' ? e.target.checked : e.target.value; setFm((o) => ({ ...o, [k]: v })); };
 
   /* ---- সর্বশেষ রান: Supabase-এর gh_run_* কলাম + এই ব্রাউজারের সংরক্ষণ — যেটি নতুন ---- */
@@ -143,12 +160,12 @@ export default function BooksTab({ d, openKey, active }) {
   useEffect(() => { if (openKey) { d.loadProofs(); pollRuns(); } }, [openKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const reload = async () => { const l = await d.loadBooks(); pollRuns(); return l; };
-  async function startRun(b, split) {
+  async function startRun(b, split, quiet) {
     try {
-      toast('workflow চালু করা হচ্ছে…');
+      if (!quiet) toast('workflow চালু করা হচ্ছে…');
       const info = await dispatchBook(d.refs.S.current, b, split);
       saveRun(b, info); setRun(b.id, { status: 'queued' });
-      toast('ছবি তৈরির workflow চালু হয়েছে — স্ট্যাটাস কিতাবের কার্ডে দেখা যাবে');
+      if (!quiet) toast('ছবি তৈরির workflow চালু হয়েছে — স্ট্যাটাস কিতাবের কার্ডে দেখা যাবে');
       schedulePoll(3000);
       return true;
     } catch (e) { toast('workflow চালু হয়নি: ' + e.message, true); return false; }
@@ -169,7 +186,7 @@ export default function BooksTab({ d, openKey, active }) {
   }
 
   /* ---- JSON ইমপোর্ট ---- */
-  const openImport = () => { setImpRows([]); setImpInfo(null); setImpErr(''); setImpFile(''); setImpProg(''); setImpSplit(getSplitPref()); setImpOpen(true); };
+  const openImport = () => { setImpRows([]); setImpInfo(null); setImpErr(''); setImpFile(''); setImpProg(''); setImpSplit(false); setImpOpen(true); };
   const onPickFile = (e) => {
     const f = e.target.files && e.target.files[0]; if (!f) return;
     setImpErr(''); setImpRows([]); setImpInfo(null); setImpFile(f.name);
@@ -207,11 +224,13 @@ export default function BooksTab({ d, openKey, active }) {
     }
     setImpErr(''); setImpBusy(true); setSplitPref(impSplit);
     let added = 0;
+    /* ছবি তৈরির workflow চালালে JSON-এর total_pages ধরা হয় না — ছবি তৈরি শেষে পেইজ গণনা হলেই কিতাব Task পেইজে দেখাবে */
+    const rowsToSave = wantRun ? impRows.map(({ total_pages, ...rest }) => (rest.pdf_url ? rest : { ...rest, total_pages })) : impRows; // eslint-disable-line no-unused-vars
     try {
-      for (let i = 0; i < impRows.length; i += BATCH) {
-        setImpProg('সংরক্ষণ হচ্ছে… ' + bn(Math.min(i + BATCH, impRows.length)) + '/' + bn(impRows.length));
-        const r = await postBatch(impRows.slice(i, i + BATCH));
-        added += (r && r.length) ? r.length : impRows.slice(i, i + BATCH).length;
+      for (let i = 0; i < rowsToSave.length; i += BATCH) {
+        setImpProg('সংরক্ষণ হচ্ছে… ' + bn(Math.min(i + BATCH, rowsToSave.length)) + '/' + bn(rowsToSave.length));
+        const r = await postBatch(rowsToSave.slice(i, i + BATCH));
+        added += (r && r.length) ? r.length : rowsToSave.slice(i, i + BATCH).length;
       }
     } catch (x) { setImpErr('ইমপোর্ট ব্যর্থ (' + bn(added) + 'টি সংরক্ষিত হয়েছে): ' + x.message); setImpBusy(false); setImpProg(''); reload(); return; }
     setImpProg('তালিকা রিফ্রেশ হচ্ছে…');
@@ -239,7 +258,7 @@ export default function BooksTab({ d, openKey, active }) {
   }
 
   /* ---- ডায়ালগ ---- */
-  const openBook = (b) => { setEditId(b ? b.id : null); setFm(b ? fromBook(b) : { ...blank(), split: getSplitPref() }); setErr(''); setDlgOpen(true); };
+  const openBook = (b) => { setEditId(b ? b.id : null); setFm(b ? fromBook(b) : blank()); setErr(''); setDlgOpen(true); };
   const nm = sl(fm.fold) || sl(fm.name);
   const runHint = nm ? 'আউটপুট ফোল্ডার: ' + nm + '_' + (S.pages_dir || DEF.pages_dir) + ' • workflow: ' + wfFile() : 'workflow: ' + wfFile();
 
@@ -260,6 +279,8 @@ export default function BooksTab({ d, openKey, active }) {
     if (rv !== '' && !(Number(rv) >= 0)) { setErr('সঠিক রেট দিন'); return; }
     row.page_rate = rv === '' ? null : Number(rv); row.total_pages = tv === '' ? null : Math.max(0, Math.round(Number(tv)) || 0);
     const wantRun = fm.run, split = fm.split;
+    /* নতুন কিতাবে ছবি তৈরি চালালে মোট পেইজ ফাঁকা রাখা হয় — ছবি তৈরি শেষ হয়ে পেইজ গণনা হলেই কিতাব Task পেইজে দেখাবে */
+    if (wantRun && !editId) row.total_pages = null;
     if (wantRun) {                                   // সংরক্ষণের আগেই যাচাই, যাতে অর্ধেক কাজ না হয়
       if (!row.pdf_url) { setErr('ছবি তৈরির জন্য পিডিএফ লিংক দিন'); return; }
       if (pdfLinks(row.pdf_url).length > 1) { setErr('একটি কিতাবে একটাই পিডিএফ লিংক দিন'); return; }
@@ -284,6 +305,98 @@ export default function BooksTab({ d, openKey, active }) {
     if (wantRun) await startRun(bk, split);
     else if (row.total_pages == null && bk && bk.id != null) autoCount(bk, true);   // মোট পেইজ ফাঁকা থাকলে নিজে গুনে নেয়
   };
+
+  /* ---- সিলেক্ট করা কিতাবগুলো একসাথে ডিলিট ---- */
+  async function delSelected() {
+    const list = selList.slice();
+    if (!list.length) { toast('কোনো কিতাব সিলেক্ট করা হয়নি', true); return; }
+    const names = list.slice(0, 5).map((b) => '• ' + b.name).join('\n') + (list.length > 5 ? '\n… ও আরও ' + bn(list.length - 5) + 'টি' : '');
+    if (!window.confirm(bn(list.length) + 'টি কিতাব ডিলিট করবেন?\n\n' + names + '\n\n(এটি ফেরানো যাবে না)')) return;
+    setBulkBusy(true); let ok = 0, fail = 0, lastErr = '';
+    for (let i = 0; i < list.length; i++) {
+      toast('ডিলিট ' + bn(i + 1) + '/' + bn(list.length) + ' — ' + list[i].name);
+      try {
+        await App.sb.del('books?id=eq.' + enc(list[i].id));
+        delete runsLS.current[list[i].id]; delete runsRef.current[list[i].id]; ok++;
+      } catch (x) { fail++; lastErr = x.message; }
+    }
+    writeRunsLS(runsLS.current); runsRef.current = { ...runsRef.current }; setRuns(runsRef.current);
+    setBulkBusy(false); exitSel();
+    toast(bn(ok) + 'টি কিতাব ডিলিট হয়েছে' + (fail ? ' • ' + bn(fail) + 'টি ব্যর্থ: ' + lastErr : ''), !!fail);
+    reload();
+  }
+
+  /* ---- বাল্ক: লুকান / দেখান ---- */
+  async function bulkHide(hide) {
+    const list = selList.filter((b) => !!b.hidden !== hide);
+    if (!selList.length) { toast('কোনো কিতাব সিলেক্ট করা হয়নি', true); return; }
+    if (!list.length) { toast(hide ? 'সিলেক্ট করা সবই আগে থেকে লুকানো' : 'সিলেক্ট করা সবই আগে থেকে দেখানো'); return; }
+    setBulkBusy(true); let ok = 0, errMsg = '';
+    for (let i = 0; i < list.length; i++) {
+      toast((hide ? 'লুকানো হচ্ছে ' : 'দেখানো হচ্ছে ') + bn(i + 1) + '/' + bn(list.length) + ' — ' + list[i].name);
+      try { await App.sb.patch('books?id=eq.' + enc(list[i].id), { hidden: hide }); d.patchBook(list[i].id, { hidden: hide }); ok++; }
+      catch (x) { errMsg = /hidden/i.test(x.message) ? 'Supabase SQL Editor-এ চালান: alter table books add column if not exists hidden boolean not null default false;' : x.message; break; }
+    }
+    setBulkBusy(false);
+    toast(bn(ok) + 'টি কিতাব ' + (hide ? 'লুকানো হয়েছে' : 'আবার দেখানো হচ্ছে') + (errMsg ? ' • ব্যর্থ: ' + errMsg : ''), !!errMsg);
+    if (!errMsg) exitSel();
+  }
+
+  /* ---- বাল্ক: রেট বদলানো ---- */
+  const openBulkRate = () => {
+    if (!selList.length) { toast('কোনো কিতাব সিলেক্ট করা হয়নি', true); return; }
+    setRateList(selList.slice()); setRateVal(''); setRateErr(''); setRateOpen(true);
+  };
+  async function doBulkRate() {
+    const rv = String(rateVal).trim();
+    if (rv !== '' && !(Number(rv) >= 0)) { setRateErr('সঠিক রেট দিন'); return; }
+    const val = rv === '' ? null : Number(rv);
+    setRateErr(''); setBulkBusy(true); let ok = 0, errMsg = '';
+    for (let i = 0; i < rateList.length; i++) {
+      const b = rateList[i];
+      try {
+        await App.sb.patch('books?id=eq.' + enc(b.id), { page_rate: val }); d.patchBook(b.id, { page_rate: val });
+        if (String(b.page_rate == null ? '' : b.page_rate) !== String(val == null ? '' : val)) App.log('admin_rate', b.name + ' → ' + (val == null ? 'ডিফল্ট' : val + ' ৳'));
+        ok++;
+      } catch (x) { errMsg = /page_rate/i.test(x.message) ? 'রেট কলাম নেই — Supabase SQL Editor-এ supabase_v2.sql চালান' : x.message; break; }
+    }
+    setBulkBusy(false);
+    if (errMsg) { setRateErr(bn(ok) + 'টি বদলেছে, তারপর ব্যর্থ: ' + errMsg); return; }
+    setRateOpen(false); exitSel();
+    toast(bn(ok) + 'টি কিতাবের রেট ' + (val == null ? 'ডিফল্ট করা হয়েছে' : rateTxt(val) + ' ৳ করা হয়েছে'));
+  }
+
+  /* ---- বাল্ক: পেইজ গণনা ---- */
+  async function bulkCount() {
+    const list = selList.slice();
+    if (!list.length) { toast('কোনো কিতাব সিলেক্ট করা হয়নি', true); return; }
+    if (!window.confirm(bn(list.length) + 'টি কিতাবের মোট পেইজ GitHub ফোল্ডার থেকে গোনা হবে। চালাবেন?')) return;
+    setBulkBusy(true); let ok = 0;
+    for (let i = 0; i < list.length; i++) {
+      toast('পেইজ গণনা ' + bn(i + 1) + '/' + bn(list.length) + ' — ' + list[i].name);
+      if (await autoCount(list[i], true)) ok++;
+    }
+    setBulkBusy(false); exitSel();
+    toast('গণনা শেষ — ' + bn(ok) + 'টি কিতাবের পেইজ সংখ্যা সংরক্ষিত, ' + bn(list.length - ok) + 'টিতে ছবি পাওয়া যায়নি');
+  }
+
+  /* ---- বাল্ক / পুনরায় চেষ্টা: ছবি তৈরির workflow ---- */
+  const openRunDlg = (list) => {
+    if (!list.length) { toast('কোনো কিতাব সিলেক্ট করা হয়নি', true); return; }
+    setRunList(list.slice()); setRunSplit(false); setRunErr(''); setRunOpen(true);
+  };
+  async function doBulkRun() {
+    const list = runList.filter((b) => b.pdf_url);
+    if (!list.length) { setRunErr('সিলেক্ট করা কিতাবগুলোর কোনোটিতেই পিডিএফ লিংক নেই'); return; }
+    if (!ghTok(S)) { setRunErr('workflow চালাতে সেটিংস ট্যাবে GitHub Token দিন'); return; }
+    setRunErr(''); setBulkBusy(true); setSplitPref(runSplit); let ok = 0;
+    for (let i = 0; i < list.length; i++) {
+      toast('workflow চালু ' + bn(i + 1) + '/' + bn(list.length) + ' — ' + list[i].name);
+      if (await startRun(list[i], runSplit, true)) ok++;
+    }
+    setBulkBusy(false); setRunOpen(false); exitSel();
+    toast(bn(ok) + 'টি কিতাবের ছবি তৈরির workflow চালু হয়েছে — স্ট্যাটাস কার্ডে দেখা যাবে' + (ok < list.length ? ' • ' + bn(list.length - ok) + 'টি চালু হয়নি' : ''), ok < list.length);
+  }
 
   /* ---- কার্ডের বোতাম ---- */
   const act = async (a, bk) => {
@@ -319,6 +432,36 @@ export default function BooksTab({ d, openKey, active }) {
     }
   };
 
+  /* ---- সার্চ + ফিল্টার + সাজানো ---- */
+  const st = (b) => {
+    const x = bst[String(b.id)] || { n: 0, a: 0, p: 0, c: 0 }, tot = Number(b.total_pages) || 0, r = runs[b.id];
+    return {
+      x, tot,
+      hidden: !!b.hidden,
+      notShown: proofsLoaded && !b.hidden && !tot && !x.n,           // Task পেইজের শর্ত: মোট পেইজ বা প্রুফড পেইজ নেই
+      running: !!r && isActiveRun(r),
+      done: !!r && r.status === 'completed' && r.conclusion === 'success',
+      failed: !!r && r.status === 'completed' && r.conclusion !== 'success'
+    };
+  };
+  const matchF = (k, v) => k === 'all' || (k === 'hidden' && v.hidden) || (k === 'notshown' && v.notShown) || (k === 'running' && v.running) || (k === 'done' && v.done) || (k === 'failed' && v.failed);
+  const qn = query.trim().toLowerCase();
+  const searched = books.filter((b) => !qn || String(b.name || '').toLowerCase().includes(qn) || String(b.author || '').toLowerCase().includes(qn));
+  const fcount = {}; FLT.forEach(([k]) => { fcount[k] = searched.filter((b) => matchF(k, st(b))).length; });
+  const idx = new Map(books.map((b, i) => [b.id, i]));
+  const byNew = (a, b) => (a.created_at && b.created_at ? String(b.created_at).localeCompare(String(a.created_at)) : idx.get(a.id) - idx.get(b.id));
+  const progOf = (b) => { const v = st(b); return v.tot ? v.x.n / v.tot : null; };
+  const leftOf = (b) => { const v = st(b); return v.tot ? Math.max(0, v.tot - v.x.n) : null; };
+  const numSort = (fn, dir) => (a, b) => { const A = fn(a), B = fn(b); if (A == null && B == null) return byNew(a, b); if (A == null) return 1; if (B == null) return -1; return A === B ? byNew(a, b) : (dir === 'asc' ? A - B : B - A); };
+  const shown = searched.filter((b) => matchF(flt, st(b))).sort(
+    sortBy === 'old' ? (a, b) => byNew(b, a)
+      : sortBy === 'name' ? (a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'bn')
+        : sortBy === 'prog_desc' ? numSort(progOf, 'desc') : sortBy === 'prog_asc' ? numSort(progOf, 'asc')
+          : sortBy === 'left_desc' ? numSort(leftOf, 'desc') : sortBy === 'left_asc' ? numSort(leftOf, 'asc')
+            : byNew
+  );
+  const selList = shown.filter((b) => sel[String(b.id)]), selCount = selList.length;
+
   return (
     <section id="pBooks">
       <div className="row" style={{ marginBottom: '12px' }}>
@@ -326,19 +469,45 @@ export default function BooksTab({ d, openKey, active }) {
         {' '}<button id="bRel" className="sm" title="কিতাব ও ছবি-তৈরির স্ট্যাটাস রিফ্রেশ" onClick={async () => { await reload(); toast('রিফ্রেশ হয়েছে'); }}><Ic n="refresh" /></button>
         {' '}<button id="bCountAll" className="sm" title="যেসব কিতাবে মোট পেইজ দেওয়া নেই, সবগুলোর পেইজ GitHub ফোল্ডার থেকে গুনুন" disabled={allCounting} onClick={countAll}><Ic n="refresh" />সব গণনা</button>
         {' '}<button id="bImp" className="sm" title="JSON ফাইল থেকে একসাথে অনেক কিতাব যোগ করুন" onClick={openImport}><Ic n="plus" />JSON ইমপোর্ট</button>
+        {' '}<button id="bSel" className={'sm' + (selMode ? ' primary' : '')} title="এক বা একাধিক কিতাব সিলেক্ট করে ডিলিট করুন" disabled={bulkBusy} onClick={() => (selMode ? exitSel() : setSelMode(true))}><Ic n="check" />{selMode ? 'সিলেক্ট বন্ধ' : 'সিলেক্ট'}</button>
         {' '}<button id="bAdd" className="primary sm" onClick={() => openBook(null)}><Ic n="plus" />নতুন কিতাব</button>
       </div>
+      {/* সার্চ, সাজানো ও ফিল্টার */}
+      <div className="row" id="bTools" style={{ marginBottom: '10px' }}>
+        <input id="bQ" type="search" placeholder="কিতাব বা লেখকের নাম খুঁজুন" style={{ flex: 1, minWidth: '180px' }} value={query} onChange={(e) => setQuery(e.target.value)} />
+        {' '}<select id="bSort" aria-label="সাজান" title="সাজান" value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          {SORTS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+        </select>
+      </div>
+      <div className="row" id="bFlt" style={{ marginBottom: '12px' }}>
+        {FLT.map(([k, l]) => <button key={k} className={'sm' + (flt === k ? ' primary' : '')} onClick={() => setFlt(k)}>{l} ({bn(fcount[k])})</button>)}
+        {flt === 'failed' && !selMode && fcount.failed ? <button id="bRetryAll" className="sm primary" title="দেখানো সব ব্যর্থ/বাতিল কিতাবের ছবি তৈরি আবার চালান" onClick={() => openRunDlg(shown.filter((b) => b.pdf_url))}><Icon name="play" />সব ব্যর্থ আবার চেষ্টা</button> : null}
+      </div>
+      <p className="hint" id="bCnt" style={{ margin: '0 0 10px' }}>{bn(shown.length)}টি কিতাব দেখানো হচ্ছে (মোট {bn(books.length)}টি)</p>
+      {selMode ? (
+        <div className="row" id="bSelBar" style={{ marginBottom: '12px' }}>
+          <span className="meta" style={{ flex: 1 }}>সিলেক্ট করা: <b>{bn(selCount)}</b>/{bn(shown.length)}</span>
+          {' '}<button id="bSelAll" className="sm" disabled={bulkBusy || !shown.length} onClick={selectAll}><Ic n="check" />{selCount && selCount === shown.length ? 'সব বাদ' : 'সব সিলেক্ট'}</button>
+          {' '}<button id="bSelHide" className="sm" disabled={bulkBusy || !selCount} onClick={() => bulkHide(true)}><Ic n="ban" />লুকান</button>
+          {' '}<button id="bSelShow" className="sm" disabled={bulkBusy || !selCount} onClick={() => bulkHide(false)}><Ic n="check" />দেখান</button>
+          {' '}<button id="bSelRate" className="sm" disabled={bulkBusy || !selCount} onClick={openBulkRate}><Ic n="edit" />রেট</button>
+          {' '}<button id="bSelCount" className="sm" disabled={bulkBusy || !selCount} onClick={bulkCount}><Ic n="refresh" />পেইজ গণনা</button>
+          {' '}<button id="bSelRun" className="sm" disabled={bulkBusy || !selCount} onClick={() => openRunDlg(selList)}><Icon name="play" />ছবি তৈরি</button>
+          {' '}<button id="bSelDel" className="sm danger" disabled={bulkBusy || !selCount} onClick={delSelected}><Ic n="trash" />ডিলিট ({bn(selCount)})</button>
+        </div>
+      ) : null}
       <div id="bList">
-        {books.length ? books.map((b) => {
-          const x = bst[String(b.id)] || { n: 0, a: 0, p: 0, c: 0 }, tot = Number(b.total_pages) || 0, info = getRun(b);
+        {books.length ? (shown.length ? shown.map((b) => {
+          const x = bst[String(b.id)] || { n: 0, a: 0, p: 0, c: 0 }, tot = Number(b.total_pages) || 0, info = getRun(b), sv = st(b);
           return (
-            <div className="li" key={b.id} style={b.hidden ? { opacity: 0.6 } : undefined}>
+            <div className="li" key={b.id} style={{ ...(b.hidden ? { opacity: 0.6 } : null), ...(selMode && sel[String(b.id)] ? { outline: '2px solid var(--accent, #0b5f4c)', outlineOffset: '-2px' } : null) }} onClick={selMode ? () => toggleSel(b.id) : undefined}>
               <div className="row" style={{ flexWrap: 'nowrap' }}>
+                {selMode ? <input type="checkbox" aria-label={'সিলেক্ট: ' + b.name} checked={!!sel[String(b.id)]} onChange={() => toggleSel(b.id)} onClick={(e) => e.stopPropagation()} style={{ flex: 'none', width: '20px', height: '20px' }} /> : null}
                 <div style={{ width: '44px', height: '58px', borderRadius: '6px', overflow: 'hidden', background: 'var(--panel2)', flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)' }}>
                   {b.cover_url ? <img src={b.cover_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <Icon name="book" />}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <b>{b.name}</b>{b.hidden ? <span className="meta" style={{ marginLeft: '8px', fontWeight: 700 }}>🚫 লুকানো</span> : null}
+                  <b>{b.name}</b>{b.hidden ? <span className="meta" style={{ marginLeft: '8px', fontWeight: 700 }}>🚫 লুকানো</span> : null}{sv.notShown ? <span className="meta" style={{ marginLeft: '8px', fontWeight: 700 }}>⏳ Task পেইজে দেখাচ্ছে না (ছবি তৈরি ও পেইজ গণনা বাকি)</span> : null}
                   <div className="meta">
                     {b.author || ''}<br />{eff(S, b, 'github_username')}/{eff(S, b, 'repo_name')}{(!b.github_username && !b.repo_name) ? ' (ডিফল্ট)' : ''} &middot; {b.folder || b.name}_{S.pages_dir || DEF.pages_dir}
                     {b.pdf_url ? <><br /><a href={b.pdf_url} target="_blank" rel="noopener noreferrer">PDF লিংক</a></> : null}
@@ -353,16 +522,17 @@ export default function BooksTab({ d, openKey, active }) {
                 </>
               ) : null}
               <div className="run">{info ? <RunBox s={runs[b.id]} /> : null}</div>
-              <div className="row">
+              {!selMode ? <div className="row">
                 <button className="sm" title="GitHub ফোল্ডার থেকে মোট পেইজ গুনুন" disabled={counting === String(b.id)} onClick={() => act('count', b)}><Ic n="refresh" />পেইজ গণনা</button>
                 <button className="sm" title={b.hidden ? 'ইউজারদের কাছে আবার দেখান' : 'ইউজারদের কাছ থেকে লুকান'} onClick={() => act('toggle', b)}><Ic n={b.hidden ? 'check' : 'ban'} />{b.hidden ? 'দেখান' : 'লুকান'}</button>
                 <button className="sm" onClick={() => act('edit', b)}><Ic n="edit" />এডিট</button>
+                {sv.failed && b.pdf_url ? <button className="sm primary" title="ব্যর্থ/বাতিল ছবি তৈরি আবার চালান" onClick={() => openRunDlg([b])}><Icon name="play" />আবার চেষ্টা</button> : null}
                 {b.pdf_url ? <button className="sm" title="পিডিএফ থেকে ছবি তৈরির workflow আবার চালান" onClick={() => act('run', b)}><Icon name="play" />ছবি তৈরি</button> : null}
                 <button className="sm danger" onClick={() => act('del', b)}><Ic n="trash" />ডিলিট</button>
-              </div>
+              </div> : null}
             </div>
           );
-        }) : <Empty>কোনো কিতাব যোগ করা হয়নি</Empty>}
+        }) : <Empty>কোনো কিতাব মেলেনি — সার্চ বা ফিল্টার বদলান</Empty>) : <Empty>কোনো কিতাব যোগ করা হয়নি</Empty>}
       </div>
 
       {/* কিতাব ডায়ালগ */}
@@ -396,6 +566,7 @@ export default function BooksTab({ d, openKey, active }) {
         <label className="chk" htmlFor="fRun"><input id="fRun" type="checkbox" checked={fm.run} onChange={set('run')} /><span>সংরক্ষণের পর পিডিএফ থেকে ছবি তৈরির workflow চালান</span></label>
         {' '}<label className="chk" htmlFor="fSplit"><input id="fSplit" type="checkbox" checked={fm.split} onChange={set('split')} /><span>প্রতিটি পেইজ বাম-ডান দুই ভাগ (split) করুন</span></label>
         <p className="hint" id="fRunHint">{runHint}</p>
+        <p className="hint">নতুন কিতাব Task পেইজে তখনই দেখাবে, যখন ছবি তৈরি শেষ হয়ে মোট পেইজ গণনা সম্পন্ন হবে।</p>
         <div className="err" id="bdErr">{err}</div>
         <div className="acts">
           <button id="bdCancel" onClick={() => setDlgOpen(false)}>বন্ধ</button>
@@ -424,6 +595,34 @@ export default function BooksTab({ d, openKey, active }) {
         <div className="acts">
           <button id="biCancel" disabled={impBusy} onClick={() => setImpOpen(false)}>বন্ধ</button>
           <button id="biSave" className="primary" disabled={impBusy || !impRows.length} onClick={doImport}>{impRows.length ? 'ইমপোর্ট (' + bn(impRows.length) + 'টি)' : 'ইমপোর্ট'}</button>
+        </div>
+      </Dlg>
+
+      {/* বাল্ক রেট ডায়ালগ */}
+      <Dlg id="bRateDlg" open={rateOpen} onClose={() => { if (!bulkBusy) setRateOpen(false); }}>
+        <h3>রেট বদলান</h3>
+        <p className="hint">{bn(rateList.length)}টি কিতাবের পেইজ প্রতি রেট একসাথে বদলাবে।</p>
+        <label className="f" htmlFor="brRate">পেইজ প্রতি রেট (৳) — ফাঁকা = ডিফল্ট রেট</label>
+        <input id="brRate" type="number" step="0.01" min="0" inputMode="decimal" placeholder={'ডিফল্ট ' + App.rateOf(null, S)} value={rateVal} onChange={(e) => setRateVal(e.target.value)} />
+        <div className="err" id="brErr">{rateErr}</div>
+        <div className="acts">
+          <button id="brCancel" disabled={bulkBusy} onClick={() => setRateOpen(false)}>বন্ধ</button>
+          <button id="brSave" className="primary" disabled={bulkBusy} onClick={doBulkRate}>সংরক্ষণ</button>
+        </div>
+      </Dlg>
+
+      {/* বাল্ক ছবি তৈরি / পুনরায় চেষ্টা ডায়ালগ */}
+      <Dlg id="bRunDlg" open={runOpen} onClose={() => { if (!bulkBusy) setRunOpen(false); }}>
+        <h3>ছবি তৈরির workflow চালান</h3>
+        <p className="hint">
+          {bn(runList.filter((b) => b.pdf_url).length)}টি কিতাবের জন্য আলাদা workflow চালু হবে{runList.some((b) => !b.pdf_url) ? ' (পিডিএফ লিংক নেই এমন ' + bn(runList.filter((b) => !b.pdf_url).length) + 'টি বাদ যাবে)' : ''}। একই নামের ছবি নতুন করে লেখা হবে; পুরনো ছবি মুছবে না।
+          {runList.length > 1 ? <><br />{runList.slice(0, 5).map((b) => '• ' + b.name).join(' ')}{runList.length > 5 ? ' … ও আরও ' + bn(runList.length - 5) + 'টি' : ''}</> : <><br />• {(runList[0] || {}).name}</>}
+        </p>
+        <label className="chk" htmlFor="brSplit"><input id="brSplit" type="checkbox" checked={runSplit} disabled={bulkBusy} onChange={(e) => setRunSplit(e.target.checked)} /><span>প্রতিটি পেইজ বাম-ডান দুই ভাগ (split) করুন</span></label>
+        <div className="err" id="brunErr">{runErr}</div>
+        <div className="acts">
+          <button id="brunCancel" disabled={bulkBusy} onClick={() => setRunOpen(false)}>বন্ধ</button>
+          <button id="brunGo" className="primary" disabled={bulkBusy} onClick={doBulkRun}>চালু করুন</button>
         </div>
       </Dlg>
     </section>

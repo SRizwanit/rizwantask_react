@@ -40,10 +40,10 @@ export const bodyFor = (S, st, note, bk) => (st === 'approved'
 
 /* ---- ব্রাউজারে সংরক্ষিত পছন্দ (workflow ফাইল, split, সর্বশেষ রান) ---- */
 export const WF_DEF = 'ultimatepdftojpg(2).yml';
-const WK = 'kp_wf_file_v1', SK2 = 'kp_split_pref_v1', RK = 'kp_bookrun_v1';
+const WK = 'kp_wf_file_v1', SK2 = 'kp_split_pref_v2', RK = 'kp_bookrun_v1';   // split কী v2: আগের সংরক্ষিত (টিক দেওয়া) পছন্দ রিসেট হয়ে ডিফল্ট "টিক ছাড়া" হয়
 export const wfFile = () => { let v = ''; try { v = (localStorage.getItem(WK) || '').trim(); } catch (e) { /* ignore */ } return v || WF_DEF; };
 export const saveWfFile = (v) => { try { const t = v.trim(); if (t) localStorage.setItem(WK, t); else localStorage.removeItem(WK); } catch (e) { /* ignore */ } };
-export const getSplitPref = () => { try { return localStorage.getItem(SK2) !== '0'; } catch (e) { return true; } };
+export const getSplitPref = () => { try { return localStorage.getItem(SK2) === '1'; } catch (e) { return false; } };   // ডিফল্ট: টিক ছাড়া (false)
 export const setSplitPref = (v) => { try { localStorage.setItem(SK2, v ? '1' : '0'); } catch (e) { /* ignore */ } };
 export const readRunsLS = () => { try { return JSON.parse(localStorage.getItem(RK) || '{}') || {}; } catch (e) { return {}; } };
 export const writeRunsLS = (o) => { try { localStorage.setItem(RK, JSON.stringify(o)); } catch (e) { /* ignore */ } };
