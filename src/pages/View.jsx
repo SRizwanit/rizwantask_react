@@ -228,7 +228,7 @@ function ViewPage({ ctx }) {
   const hdrRef = useRef(null), ftrRef = useRef(null);
 
   /* ---------- GitHub + ছবি ক্যাশ ---------- */
-  const gh = useMemo(() => createGithub(() => cfgRef.current), []);
+  const gh = useMemo(() => createGithub(() => cfgRef.current, IS_ADMIN), []);
   const imgProg = useEvent((name, pct) => {
     const im = imagesRef.current[curRef.current];
     if (im && im.name === name) setLdr((v) => (v === undefined ? v : pct));
@@ -400,7 +400,7 @@ function ViewPage({ ctx }) {
     const im = imagesRef.current[curRef.current];
     if (!(await copyPlain(buildAiPrompt(im)))) { toast('কপি ব্যর্থ — ব্রাউজার ক্লিপবোর্ডে লিখতে দিচ্ছে না', true); return; }
     toast(repoPrivate.current === true
-      ? 'প্রম্পট কপি হয়েছে (পেইজ ' + im.stem + ') — তবে রিপো প্রাইভেট, AI এই raw লিংক খুলতে পারবে না'
+      ? 'প্রম্পট কপি হয়েছে (পেইজ ' + im.stem + ') — তবে ছবির লিংক প্রাইভেট, AI এটি খুলতে পারবে না'
       : 'AI প্রম্পট কপি হয়েছে (পেইজ ' + im.stem + ') — AI চ্যাটে পেস্ট করুন', repoPrivate.current === true, 4500);
   });
 
@@ -517,7 +517,7 @@ function ViewPage({ ctx }) {
       if (r.ok) {
         if (legacyProof.current) {
           legacyProof.current = false;
-          toast('প্রুফড তালিকা এখন ' + P.proofPath + '-এ সংরক্ষিত — রিপোর রুটের পুরনো ' + P.legacyProofPath + ' চাইলে মুছে ফেলতে পারেন', false, 7000);
+          if (IS_ADMIN) toast('প্রুফড তালিকা এখন ' + P.proofPath + '-এ সংরক্ষিত — রিপোর রুটের পুরনো ' + P.legacyProofPath + ' চাইলে মুছে ফেলতে পারেন', false, 7000);
         }
         return;
       }
@@ -567,7 +567,7 @@ function ViewPage({ ctx }) {
     if (val) proofed.add(stem); else proofed.delete(stem);
     if (proofDbRef.current) { loadDone(); try { App.log(val ? 'proof' : 'unproof', (BOOK.name || BOOK_ID) + ' / ' + stem); } catch (e) { /* ignore */ } }
     if (!val) reviews.delete(stem); else if (!reviews.has(stem)) reviews.set(stem, { s: 'pending', note: '' });
-    if (jerr) toast('প্রুফড চিহ্ন সংরক্ষিত হয়েছে, কিন্তু GitHub-এর প্রুফড ফাইল হালনাগাদ হয়নি: ' + jerr.message, true, 6000);
+    if (jerr) toast('প্রুফড চিহ্ন সংরক্ষিত হয়েছে, কিন্তু প্রুফড তালিকা হালনাগাদ হয়নি: ' + jerr.message, true, 6000);
     refresh();
     return true;
   });
@@ -597,7 +597,7 @@ function ViewPage({ ctx }) {
       const j = await r.json();
       setSha(j.content.sha); setOrig(value); textSetRef.current.add(im.stem);
       stashDraft();                     // সেভের মধ্যে আবার কিছু লিখলে সেটা খসড়া থাকবে, নইলে খসড়া মুছে যাবে
-      repaint(); toast('সেভ হয়েছে (GitHub-এ পুশ)');
+      repaint(); toast('সেভ হয়েছে');
       return true;
     } catch (e) { toast('সেভ ব্যর্থ: ' + e.message + ' (লেখা খসড়ায় নিরাপদ আছে)', true); return false; }
     finally { busy.current = false; updateStatus(); if (blocked) applyProofs(); }
@@ -669,7 +669,7 @@ function ViewPage({ ctx }) {
       if (my !== seq.current) return;
       if (ok) {
         const k = dk(im.stem), d = draftsRef.current[k];
-        if (d && normNl(d.t) !== origRef.current) { putText(d.t); toast('অসংরক্ষিত খসড়া ফিরিয়ে আনা হয়েছে — সেভ করলে পুশ হবে', false, 3500); }
+        if (d && normNl(d.t) !== origRef.current) { putText(d.t); toast('অসংরক্ষিত খসড়া ফিরিয়ে আনা হয়েছে — সেভ করলে সংরক্ষিত হবে', false, 3500); }
         else if (d) { delete draftsRef.current[k]; persistDrafts(); }
         setTaLoading(false); ta.scrollTop = 0;
         setPlaceholder('এই পেইজের টেক্সট এখনো নেই — এখানে টেক্সট পেস্ট করে সেভ করুন');
@@ -719,7 +719,7 @@ function ViewPage({ ctx }) {
     flush();
     setOverride('লোড হচ্ছে…');
     try {
-      if (!cfgRef.current.token) toast('টোকেন নেই — শুধু দেখা যাবে, সেভ/পুশ হবে না (সেটিংস থেকে টোকেন দিন)', true, 4500);
+      if (!cfgRef.current.token) toast('টোকেন নেই — শুধু দেখা যাবে, সেভ হবে না (সেটিংস থেকে টোকেন দিন)', true, 4500);
 
       // ডিফল্ট ব্রাঞ্চ ও লেখার অনুমতি জানা
       const ri = await gh.api('');
@@ -728,14 +728,14 @@ function ViewPage({ ctx }) {
       repoPrivate.current = !!info.private;
       defaultBranch.current = info.default_branch || '';
       if (cfgRef.current.token && info.permissions && info.permissions.push === false)
-        toast('এই টোকেনে রিপোতে লেখার অনুমতি নেই (Contents: Read and write দিন)', true, 6000);
+        toast(IS_ADMIN ? 'এই টোকেনে রিপোতে লেখার অনুমতি নেই (Contents: Read and write দিন)' : 'এই টোকেনে সেভ করার অনুমতি নেই — টোকেন বদলে নিন', true, 6000);
       const br = cfgRef.current.branch || info.default_branch;
 
       // এক রিকোয়েস্টে পুরো ফাইল তালিকা (১০০০-এর বেশি পেইজেও কাজ করে)
       const rt = await gh.api('/git/trees/' + encodeURIComponent(br) + '?recursive=1');
       if (!rt.ok) throw new Error(await gh.errMsg(rt));
       const tj = await rt.json();
-      if (tj.truncated) toast('সতর্কতা: রিপো খুব বড়, ফাইল তালিকা অসম্পূর্ণ হতে পারে', true);
+      if (tj.truncated) toast(IS_ADMIN ? 'সতর্কতা: রিপো খুব বড়, ফাইল তালিকা অসম্পূর্ণ হতে পারে' : 'সতর্কতা: পেইজ তালিকা অসম্পূর্ণ হতে পারে', true);
       const blobs = (tj.tree || []).filter((e) => e.type === 'blob');
 
       const P = repoPaths(cfgRef.current);
@@ -750,7 +750,7 @@ function ViewPage({ ctx }) {
       const ts = new Set();
       blobs.forEach((e) => { if (direct(e, tp) && /\.txt$/i.test(e.path)) ts.add(e.path.slice(tp.length).replace(/\.txt$/i, '')); });
       if (!blobs.some((e) => e.path.startsWith(tp)))
-        toast(P.textsDir + '/ ফোল্ডার এখনো নেই — প্রথম সেভ করলেই নিজে থেকে তৈরি হবে', false, 4500);
+        toast(IS_ADMIN ? P.textsDir + '/ ফোল্ডার এখনো নেই — প্রথম সেভ করলেই নিজে থেকে তৈরি হবে' : 'এখনো কোনো টেক্সট সেভ হয়নি — প্রথম সেভ করলেই শুরু হবে', false, 4500);
 
       let ps = new Set();
       const readProof = async (path) => {
@@ -900,7 +900,7 @@ function ViewPage({ ctx }) {
       if (cfgRef.current.autoHead) value = markHeadings(value).text;
       draftsRef.current[dk(stem)] = { t: value, ts: Date.now() }; persistDrafts();
       repaint(); updateStatus();
-      toast(nm + ' সম্পন্ন — ফল পেইজ ' + stem + '-এর খসড়ায় রাখা হয়েছে (ওই পেইজে গেলে দেখা যাবে, সেভ করলে পুশ হবে)' + (warn.length ? ' • সতর্কতা: ' + warn.join(' • ') : ''), warn.length > 0, 7000);
+      toast(nm + ' সম্পন্ন — ফল পেইজ ' + stem + '-এর খসড়ায় রাখা হয়েছে (ওই পেইজে গেলে দেখা যাবে, সেভ করলে সংরক্ষিত হবে)' + (warn.length ? ' • সতর্কতা: ' + warn.join(' • ') : ''), warn.length > 0, 7000);
     }
   };
 
@@ -1023,7 +1023,7 @@ function ViewPage({ ctx }) {
     let k = 0;
     T.loadingStart(1 + (needProof ? 1 : 0) + (isLast ? 0 : 1));
     try {
-      T.loadingStep(++k, isDirty() ? 'টেক্সট সেভ হচ্ছে (GitHub-এ পুশ)…' : 'সেভ যাচাই হচ্ছে…');
+      T.loadingStep(++k, isDirty() ? 'টেক্সট সেভ হচ্ছে…' : 'সেভ যাচাই হচ্ছে…');
       if (!(await saveText())) { T.loadingHide(); return; }
       if (needProof) {
         T.loadingStep(++k, 'প্রুফড চিহ্নিত হচ্ছে…');
