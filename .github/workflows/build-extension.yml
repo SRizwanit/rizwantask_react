@@ -18,18 +18,22 @@ jobs:
         with:
           node-version: 20
 
-      # প্রজেক্ট রিপোর রুটে থাকলে সেটাই; না থাকলে রুটের .zip খুলে ভেতরের package.json-ওয়ালা ফোল্ডার ব্যবহার হয়
-      - name: Locate project (unzip if needed)
+      # রুটে .zip থাকলে সেটাই খুলে বিল্ড হয় (রুটে package.json থাকলেও); .zip না থাকলে রুটের প্রজেক্ট
+      - name: Locate project (zip first)
         id: proj
         run: |
-          if [ ! -f package.json ]; then
-            Z=$(ls -1 *.zip 2>/dev/null | head -n1)
-            [ -n "$Z" ] || { echo "রুটে package.json বা .zip পাওয়া যায়নি"; exit 1; }
+          Z=$(ls -1 *.zip 2>/dev/null | head -n1 || true)
+          if [ -n "$Z" ]; then
+            echo "ZIP ব্যবহার হচ্ছে: $Z"
             mkdir -p _proj && unzip -q -o "$Z" -d _proj
-            D=$(dirname "$(find _proj -name package.json -not -path '*/node_modules/*' | head -n1)")
+            M=$(find _proj -path '*/extension/manifest.json' -not -path '*/node_modules/*' | head -n1)
+            [ -n "$M" ] || { echo "ZIP-এ extension/manifest.json নেই"; exit 1; }
+            D=$(dirname "$(dirname "$M")")
           else
+            [ -f package.json ] || { echo "রুটে .zip বা package.json নেই"; exit 1; }
             D=.
           fi
+          grep -q '"pack:ext"' "$D/package.json" || { echo "$D/package.json-এ pack:ext স্ক্রিপ্ট নেই"; exit 1; }
           echo "dir=$D" >> "$GITHUB_OUTPUT"
           echo "Project dir: $D"
 
