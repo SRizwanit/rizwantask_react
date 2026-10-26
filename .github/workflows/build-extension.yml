@@ -1,0 +1,75 @@
+name: Build Extension (.crx / .zip / .xpi)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # প্রজেক্ট রিপোর রুটে থাকলে সেটাই; না থাকলে রুটের .zip খুলে ভেতরের package.json-ওয়ালা ফোল্ডার ব্যবহার হয়
+      - name: Locate project (unzip if needed)
+        id: proj
+        run: |
+          if [ ! -f package.json ]; then
+            Z=$(ls -1 *.zip 2>/dev/null | head -n1)
+            [ -n "$Z" ] || { echo "রুটে package.json বা .zip পাওয়া যায়নি"; exit 1; }
+            mkdir -p _proj && unzip -q -o "$Z" -d _proj
+            D=$(dirname "$(find _proj -name package.json -not -path '*/node_modules/*' | head -n1)")
+          else
+            D=.
+          fi
+          echo "dir=$D" >> "$GITHUB_OUTPUT"
+          echo "Project dir: $D"
+
+      - name: Install dependencies
+        working-directory: ${{ steps.proj.outputs.dir }}
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Write signing key (optional secret)
+        working-directory: ${{ steps.proj.outputs.dir }}
+        env:
+          KEY: ${{ secrets.EXTENSION_KEY_PEM }}
+        run: |
+          if [ -n "$KEY" ]; then printf '%s\n' "$KEY" > extension-key.pem; echo "সংরক্ষিত কী ব্যবহার হচ্ছে"; else echo "EXTENSION_KEY_PEM সেট নেই — নতুন কী তৈরি হবে (Extension ID বদলাবে)"; fi
+
+      - name: Build + pack extension
+        working-directory: ${{ steps.proj.outputs.dir }}
+        env:
+          # ঐচ্ছিক: না দিলে এক্সটেনশন প্রথম চালুতে সেটআপ-স্ক্রিন দেখায়
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_KEY: ${{ secrets.VITE_SUPABASE_KEY }}
+          VITE_ADMIN_PHONE: ${{ secrets.VITE_ADMIN_PHONE }}
+          VITE_ADMIN_WA: ${{ secrets.VITE_ADMIN_WA }}
+        run: npm run pack:ext
+
+      - name: Collect release files
+        run: |
+          mkdir -p out
+          cp "${{ steps.proj.outputs.dir }}"/release/* out/
+          ls -la out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RizwanTask-extension
+          path: out/*
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "ext-${{ github.run_number }}" out/* \
+            --title "RizwanTask Extension #${{ github.run_number }}" \
+            --notes "Chrome: .crx / .zip — Firefox & RainSee (Gecko): .xpi / .zip"
