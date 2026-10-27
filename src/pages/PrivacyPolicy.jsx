@@ -1,21 +1,21 @@
-/* privacypolicy → রিয়্যাক্ট: RizwanTask প্রাইভেসি পলিসি (Google Play-র জন্য)। লিংক: /privacypolicy
-   অ্যাকাউন্ট মোছার অংশ: /privacypolicy#delete (Play Console-এ "অ্যাকাউন্ট মোছার ওয়েব লিংক" হিসেবে দেওয়া যাবে)।
-   লগইন লাগে না; Supabase/Firebase ছোঁয় না — শুধু স্থির লেখা + হোয়াটসঅ্যাপ/ইমেইলে মোছার অনুরোধ। */
+/* privacypolicy → React: RizwanTask Privacy Policy (for Google Play). Link: /privacypolicy
+   Account deletion section: /privacypolicy#delete (use as the "account deletion web link" in Play Console).
+   No login needed; does not touch Supabase/Firebase — static text + account deletion request by WhatsApp / email. */
 import { useEffect, useState } from 'react';
 import './PrivacyPolicy.css';
 
 const APP_NAME = 'RizwanTask';
 const SITE = 'https://rizwantask.vercel.app';
-const UPDATED = '২৭ অক্টোবর ২০২৬';
-const WA_NUMBER = '8801714656343';          // হোয়াটসঅ্যাপে খুলবে (wa.me/<নাম্বার>)
+const UPDATED = 'October 27, 2026';
+const WA_NUMBER = '8801714656343';          // opens in WhatsApp (wa.me/<number>)
 const EMAIL = 'rizwanit0102@gmail.com';
 
 const waLink = (text) => `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(text)}`;
 
 const TOC = [
-  ['collect', 'কী তথ্য নিই'], ['use', 'কেন ব্যবহার করি'], ['share', 'তৃতীয় পক্ষ'], ['device', 'ফোনে সংরক্ষণ ও অনুমতি'],
-  ['retention', 'সংরক্ষণকাল'], ['delete', 'অ্যাকাউন্ট মোছা'], ['rights', 'আপনার অধিকার'], ['security', 'নিরাপত্তা'],
-  ['children', 'শিশু'], ['contact', 'যোগাযোগ']
+  ['collect', 'Information we collect'], ['use', 'How we use it'], ['share', 'Third-party services'], ['device', 'On-device storage & permissions'],
+  ['retention', 'Retention'], ['delete', 'Delete your account'], ['rights', 'Your rights'], ['security', 'Security'],
+  ['children', 'Children'], ['contact', 'Contact']
 ];
 
 export default function PrivacyPolicy() {
@@ -24,196 +24,195 @@ export default function PrivacyPolicy() {
 
   useEffect(() => {
     const old = document.title;
-    document.title = 'প্রাইভেসি পলিসি — ' + APP_NAME;
-    // সরাসরি #delete (বা অন্য #আইডি) লিংকে এলে ঐ অংশে স্ক্রল
+    document.title = 'Privacy Policy — ' + APP_NAME;
+    // opened directly with #delete (or any #id): scroll to that section
     const h = window.location.hash.slice(1);
     if (h) setTimeout(() => document.getElementById(h)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
     return () => { document.title = old; };
   }, []);
 
-  /* মোছার অনুরোধের তৈরি বার্তা (নাম/মোবাইল ফাঁকা হলে "-") */
+  /* ready-made deletion request message (empty name / phone shows "-") */
   const delMsg = () =>
-    'আসসালামু আলাইকুম, আমি আমার ' + APP_NAME + ' অ্যাকাউন্ট ও সংশ্লিষ্ট ব্যক্তিগত তথ্য মুছে ফেলার অনুরোধ করছি।\n' +
-    'নাম: ' + (name.trim() || '-') + '\nমোবাইল নাম্বার: ' + (phone.trim() || '-');
+    'Hello, I would like to request deletion of my ' + APP_NAME + ' account and the personal data linked to it.\n' +
+    'Name: ' + (name.trim() || '-') + '\nMobile number: ' + (phone.trim() || '-');
   const waDelete = waLink(delMsg());
-  const mailDelete = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent(APP_NAME + ' — অ্যাকাউন্ট মোছার অনুরোধ') + '&body=' + encodeURIComponent(delMsg());
+  const mailDelete = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent(APP_NAME + ' — Account deletion request') + '&body=' + encodeURIComponent(delMsg());
 
   return (
-    <div className="pp">
+    <div className="pp" lang="en">
       <div className="pp-wrap">
         <header className="pp-head">
           <div className="pp-logo" aria-hidden="true">
             <svg className="i" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
           </div>
-          <h1>প্রাইভেসি পলিসি</h1>
-          <p>{APP_NAME} (অ্যান্ড্রয়েড অ্যাপ ও ওয়েবসাইট) • সর্বশেষ হালনাগাদ: {UPDATED}</p>
+          <h1>Privacy Policy</h1>
+          <p>{APP_NAME} (Android app and website) • Last updated: {UPDATED}</p>
         </header>
 
-        <nav className="pp-toc" aria-label="সূচিপত্র">
+        <nav className="pp-toc" aria-label="Table of contents">
           {TOC.map(([id, label]) => <a key={id} href={'#' + id}>{label}</a>)}
         </nav>
 
         <section className="pp-card">
-          <h2>ভূমিকা</h2>
+          <h2>Introduction</h2>
           <p>
-            {APP_NAME} একটি কিতাব প্রুফিং (পেইজ মিলিয়ে দেখা ও টেক্সট সংশোধন) অ্যাপ। ইউজার কিতাবের পেইজের ছবি দেখে টেক্সট প্রুফ করেন,
-            অ্যাডমিন কাজ রিভিউ করেন এবং অনুমোদিত কাজের জন্য নির্ধারিত রেটে আয় হিসাব হয়, যা বিকাশ বা নগদে পরিশোধ করা হয়।
-            এই পলিসিতে লেখা আছে আমরা কোন তথ্য নিই, কেন নিই, কীভাবে সুরক্ষিত রাখি এবং আপনি কীভাবে তা মুছতে পারেন।
-            অ্যাপ ব্যবহার করলে আপনি এই পলিসিতে সম্মত হচ্ছেন।
+            {APP_NAME} is a book proofing app (checking book pages and correcting their text). Users read the image of a book page and proofread its text,
+            an admin reviews the work, and earnings for approved work are calculated at a fixed rate and paid out through bKash or Nagad.
+            This policy explains what information we collect, why we collect it, how we protect it, and how you can delete it.
+            By using the app you agree to this policy.
           </p>
         </section>
 
         <section className="pp-card" id="collect">
-          <h2>১. আমরা কী তথ্য সংগ্রহ করি</h2>
-          <h3>আপনার দেওয়া তথ্য</h3>
+          <h2>1. Information we collect</h2>
+          <h3>Information you give us</h3>
           <ul>
-            <li><b>পূর্ণ নাম</b> ও <b>মোবাইল নাম্বার</b> — অ্যাকাউন্ট খোলা ও লগইনের জন্য।</li>
-            <li><b>৪ ডিজিটের PIN</b> — PIN সরাসরি রাখা হয় না; শুধু লবণসহ (salt) এনক্রিপ্টেড হ্যাশ (SHA-256) সংরক্ষিত হয়।</li>
-            <li><b>পেমেন্ট মাধ্যম ও নাম্বার</b> (বিকাশ/নগদ) — আয়ের টাকা পাঠানোর জন্য।</li>
-            <li><b>প্রুফ করা টেক্সট</b> ও কাজের অবস্থা (কোন কিতাবের কোন পেইজ সম্পন্ন/রিভিউতে/অনুমোদিত) এবং সেখান থেকে হিসাব করা আয়, উত্তোলনের অনুরোধ ও পরিশোধের তথ্য।</li>
-            <li><b>টিকেট/সাপোর্ট বার্তা</b> — সাহায্য চাইলে আপনি যা লেখেন বা হোয়াটসঅ্যাপে পাঠান।</li>
+            <li><b>Full name</b> and <b>mobile number</b> — to create your account and sign you in.</li>
+            <li><b>4-digit PIN</b> — your PIN is never stored as plain text; only a salted, encrypted hash (SHA-256) is kept.</li>
+            <li><b>Payment method and number</b> (bKash / Nagad) — to send your earnings.</li>
+            <li><b>Proofread text</b> and work status (which page of which book is done / in review / approved), the earnings calculated from it, and your withdrawal requests and payout records.</li>
+            <li><b>Ticket / support messages</b> — whatever you write when you ask for help, or send us on WhatsApp.</li>
           </ul>
-          <h3>স্বয়ংক্রিয়ভাবে সংগৃহীত তথ্য</h3>
+          <h3>Information collected automatically</h3>
           <ul>
-            <li><b>ডিভাইস আইডি</b> — অ্যাপ প্রথম চালুর সময় তৈরি হওয়া একটি এলোমেলো আইডি (বিজ্ঞাপন আইডি, IMEI বা সিরিয়াল নাম্বার নয়)। এটি দিয়ে "এক ডিভাইসে এক অ্যাকাউন্ট" নিয়ম ও অপব্যবহার ঠেকানো হয়।</li>
-            <li><b>কার্যকলাপ লগ</b> — সাইন আপ, লগইন, লগআউট, পেমেন্ট নাম্বার পরিবর্তন, উত্তোলনের অনুরোধ, টিকেট খোলা, অ্যাকাউন্ট মোছা ইত্যাদি কাজের নাম ও সময়।</li>
-            <li><b>সর্বশেষ সক্রিয় থাকার সময়</b> — অ্যাকাউন্টের সক্রিয়তা বোঝার জন্য।</li>
-            <li>ইন্টারনেট সংযোগ ও ত্রুটির মৌলিক অবস্থা (অ্যাপ ঠিকমতো চলছে কিনা দেখানোর জন্য)।</li>
+            <li><b>Device ID</b> — a random ID created when the app first runs (not an advertising ID, IMEI or serial number). It is used for the "one account per device" rule and to prevent misuse.</li>
+            <li><b>Activity log</b> — the name and time of actions such as sign-up, login, logout, payment number change, withdrawal request, opening a ticket and account deletion.</li>
+            <li><b>Last active time</b> — to understand whether an account is active.</li>
+            <li>Basic network and error status (to show whether the app is working properly).</li>
           </ul>
           <div className="pp-note">
-            আমরা আপনার <b>অবস্থান (লোকেশন)</b>, <b>কন্টাক্ট লিস্ট</b>, <b>এসএমএস</b>, <b>মাইক্রোফোন রেকর্ডিং</b> বা বিজ্ঞাপন-ট্র্যাকিং তথ্য সংগ্রহ করি না এবং কোনো বিজ্ঞাপন দেখাই না।
+            We do <b>not</b> collect your <b>location</b>, <b>contacts</b>, <b>SMS</b>, <b>microphone recordings</b> or advertising-tracking data, and we do not show any ads.
           </div>
         </section>
 
         <section className="pp-card" id="use">
-          <h2>২. তথ্য কেন ব্যবহার করি</h2>
+          <h2>2. How we use your information</h2>
           <ul>
-            <li>অ্যাকাউন্ট তৈরি, লগইন ও এক ডিভাইসে এক অ্যাকাউন্ট নিয়ম বজায় রাখা।</li>
-            <li>প্রুফিং কাজ জমা নেওয়া, রিভিউ করা এবং আয়ের হিসাব রাখা।</li>
-            <li>অনুমোদিত কাজের টাকা আপনার দেওয়া বিকাশ/নগদ নাম্বারে পরিশোধ করা।</li>
-            <li>নোটিশ ও ঘোষণা দেখানো, সাপোর্ট দেওয়া, অপব্যবহার ও জালিয়াতি ঠেকানো এবং অ্যাপ উন্নত করা।</li>
-            <li>আইনি বাধ্যবাধকতা পালন।</li>
+            <li>To create your account, sign you in and keep the one-account-per-device rule.</li>
+            <li>To accept proofing work, review it and keep a record of your earnings.</li>
+            <li>To pay approved earnings to the bKash / Nagad number you provided.</li>
+            <li>To show notices and announcements, give support, prevent misuse and fraud, and improve the app.</li>
+            <li>To meet legal obligations.</li>
           </ul>
-          <p>আমরা আপনার ব্যক্তিগত তথ্য <b>বিক্রি করি না</b> এবং বিজ্ঞাপনের জন্য কারো সাথে ভাগ করি না।</p>
+          <p>We <b>do not sell</b> your personal information and we do not share it with anyone for advertising.</p>
         </section>
 
         <section className="pp-card" id="share">
-          <h2>৩. তৃতীয় পক্ষের সেবা</h2>
-          <p>অ্যাপ ও ওয়েবসাইট চালাতে নিচের সেবাগুলো ব্যবহার হয়। প্রতিটির নিজস্ব প্রাইভেসি পলিসি আছে।</p>
+          <h2>3. Third-party services</h2>
+          <p>The following services are used to run the app and website. Each has its own privacy policy.</p>
           <div className="pp-tablewrap">
             <table>
-              <thead><tr><th>সেবা</th><th>কী কাজে</th><th>কোন তথ্য যায়</th></tr></thead>
+              <thead><tr><th>Service</th><th>Purpose</th><th>Data involved</th></tr></thead>
               <tbody>
-                <tr><td>Supabase</td><td>ডেটাবেস (অ্যাকাউন্ট, প্রুফ, হিসাব, লগ)</td><td>উপরে ১ নম্বরে লেখা অ্যাকাউন্ট ও কাজের তথ্য</td></tr>
-                <tr><td>GitHub</td><td>কিতাবের পেইজের ছবি ও কিতাব-ফাইল রাখা/পড়া</td><td>ছবির অনুরোধ (আপনার ব্যক্তিগত তথ্য নয়)</td></tr>
-                <tr><td>Firebase (Google)</td><td>ওয়েব সাপোর্ট চ্যাট ও টিকেট</td><td>সাপোর্টে আপনি যে বার্তা লেখেন</td></tr>
-                <tr><td>Google Gemini API (ঐচ্ছিক)</td><td>ছবি থেকে টেক্সট (OCR) ও স্বয়ংক্রিয় প্রুফিং</td><td>আপনি এই সুবিধা চালালে বর্তমান পেইজের ছবি/টেক্সট আপনার নিজের API কী দিয়ে Google-এ যায়</td></tr>
-                <tr><td>Google Lens (ব্রাউজারে)</td><td>ছবি থেকে টেক্সট কপি</td><td>আপনি বোতাম চাপলে ছবির লিংক ব্রাউজারে Google Lens-এ খোলে</td></tr>
-                <tr><td>Vercel</td><td>এই ওয়েবসাইট হোস্টিং</td><td>সাধারণ ওয়েব অনুরোধের তথ্য (IP ইত্যাদি)</td></tr>
-                <tr><td>WhatsApp / ব্রাউজার / AI চ্যাট সাইট</td><td>সাহায্য চাওয়া, প্রম্পট পেস্ট করতে AI সাইট খোলা</td><td>আপনি নিজে যা পাঠান বা পেস্ট করেন; অ্যাপ নিজে থেকে কিছু পাঠায় না</td></tr>
-                <tr><td>বিকাশ / নগদ</td><td>টাকা পরিশোধ</td><td>আপনার পেমেন্ট নাম্বার ও পরিশোধের পরিমাণ (অ্যাডমিন পাঠানোর সময়)</td></tr>
+                <tr><td>Supabase</td><td>Database (accounts, proofs, earnings, logs)</td><td>The account and work information listed in section 1</td></tr>
+                <tr><td>Firebase (Google)</td><td>Web support chat and tickets</td><td>The messages you write to support</td></tr>
+                <tr><td>Google Gemini API (optional)</td><td>Image-to-text (OCR) and automatic proofing</td><td>If you turn this feature on, the current page's image / text is sent to Google using your own API key</td></tr>
+                <tr><td>Google Lens (in your browser)</td><td>Copying text from an image</td><td>When you tap the button, the image link opens in Google Lens in your browser</td></tr>
+                <tr><td>Vercel</td><td>Hosting of this website</td><td>Standard web request data (IP address etc.)</td></tr>
+                <tr><td>WhatsApp / browser / AI chat sites</td><td>Asking for help; opening an AI site to paste a prompt</td><td>Only what you send or paste yourself; the app does not send anything on its own</td></tr>
+                <tr><td>bKash / Nagad</td><td>Paying out earnings</td><td>Your payment number and the payout amount (when the admin sends the money)</td></tr>
               </tbody>
             </table>
           </div>
           <p>
-            আইনের নির্দেশ বা জালিয়াতি ঠেকানোর প্রয়োজন ছাড়া আমরা আপনার তথ্য অন্য কারো কাছে প্রকাশ করি না।
-            অ্যাডমিন (অ্যাপের পরিচালক) কাজ রিভিউ, পরিশোধ ও সাপোর্টের জন্য আপনার নাম, মোবাইল ও পেমেন্ট নাম্বার দেখতে পারেন।
+            We do not disclose your information to anyone else, except when required by law or to prevent fraud.
+            The admin (the app's operator) can see your name, mobile number and payment number for work review, payouts and support.
           </p>
         </section>
 
         <section className="pp-card" id="device">
-          <h2>৪. ফোনে সংরক্ষণ ও অনুমতি</h2>
+          <h2>4. On-device storage and permissions</h2>
           <ul>
-            <li><b>শুধু আপনার ফোনে থাকা তথ্য:</b> লগইন সেশন, ডিভাইস আইডি, থিম, খসড়া টেক্সট এবং আপনার দেওয়া Gemini API কী, মডেল ও প্রম্পট সেটিংস। এগুলো আমাদের সার্ভারে বা GitHub-এ যায় না। অ্যাপ মুছলে বা ডেটা মুছলে এগুলোও চলে যায়।</li>
-            <li><b>ইন্টারনেট:</b> সার্ভারের সাথে যোগাযোগের জন্য আবশ্যক।</li>
-            <li><b>ক্যামেরা ও ছবি/মিডিয়া (ঐচ্ছিক):</b> ছবি তোলা বা বাছাইয়ের সুবিধার জন্য। আপনি অনুমতি না দিলেও অ্যাপের মূল কাজ চলে। এই অনুমতি দিয়ে আমরা আপনার গ্যালারি স্ক্যান বা আপলোড করি না।</li>
-            <li><b>ক্লিপবোর্ড:</b> আপনি "কপি" বা "পেস্ট" বোতাম চাপলেই শুধু ব্যবহার হয়; পেছনে ক্লিপবোর্ড পড়া হয় না।</li>
-            <li><b>টেক্সট-টু-স্পিচ:</b> ফোনের নিজস্ব TTS ইঞ্জিন ব্যবহার করে পড়ে শোনানো হয়।</li>
+            <li><b>Kept only on your phone:</b> your login session, device ID, theme, draft text, and the Gemini API key, model and prompt settings you enter. These are not sent to our servers. They are removed when you uninstall the app or clear its data.</li>
+            <li><b>Internet:</b> required to communicate with the server.</li>
+            <li><b>Camera and photos / media (optional):</b> for taking or choosing pictures. The app's main functions work even if you do not grant these. We do not scan or upload your gallery with this permission.</li>
+            <li><b>Clipboard:</b> used only when you tap the "copy" or "paste" buttons; the clipboard is never read in the background.</li>
+            <li><b>Text-to-speech:</b> your phone's own TTS engine is used to read text aloud.</li>
           </ul>
         </section>
 
         <section className="pp-card" id="retention">
-          <h2>৫. তথ্য কতদিন রাখা হয়</h2>
+          <h2>5. How long we keep your data</h2>
           <ul>
-            <li>অ্যাকাউন্ট সক্রিয় থাকা পর্যন্ত আপনার অ্যাকাউন্ট ও কাজের তথ্য রাখা হয়।</li>
-            <li>অ্যাকাউন্ট মুছলে নাম, মোবাইল নাম্বার, PIN-এর হ্যাশ ও পেমেন্ট নাম্বারসহ অ্যাকাউন্টের তথ্য সরিয়ে ফেলা হয় (নিচে ৬ নম্বর দেখুন)।</li>
-            <li>হিসাব-নিকাশ, পরিশোধের রেকর্ড ও কিতাবের প্রুফ করা টেক্সট (যা কিতাব প্রকাশের কাজের অংশ) আইনি ও হিসাবের প্রয়োজনে সীমিত সময় রাখা হতে পারে।</li>
+            <li>Your account and work information are kept while your account is active.</li>
+            <li>When you delete your account, your account information — name, mobile number, PIN hash and payment number — is removed (see section 6).</li>
+            <li>Accounting and payout records, and proofread book text (which is part of the book publishing work), may be kept for a limited time for legal and bookkeeping needs.</li>
           </ul>
         </section>
 
         <section className="pp-card" id="delete">
-          <h2>৬. অ্যাকাউন্ট ও তথ্য মোছা</h2>
-          <h3>অ্যাপ থেকে (সবচেয়ে সহজ)</h3>
+          <h2>6. Delete your account and data</h2>
+          <h3>From the app (easiest)</h3>
           <ol>
-            <li>অ্যাপে লগইন করে <b>প্রোফাইল</b> পেজে যান।</li>
-            <li>নিচে <b>"অ্যাকাউন্ট মুছুন"</b> বোতাম চাপুন।</li>
-            <li>আপনার <b>৪ ডিজিটের PIN</b> দিন এবং শেষ নিশ্চিতকরণে <b>"হ্যাঁ, মুছুন"</b> চাপুন।</li>
+            <li>Sign in to the app and open the <b>Profile</b> page.</li>
+            <li>Tap the <b>"Delete account"</b> button (<b>"অ্যাকাউন্ট মুছুন"</b> in the app).</li>
+            <li>Enter your <b>4-digit PIN</b> and confirm in the final dialog.</li>
           </ol>
-          <p>নিশ্চিত করার সাথে সাথে আপনার অ্যাকাউন্ট (নাম, মোবাইল নাম্বার, PIN-এর হ্যাশ, পেমেন্ট নাম্বার) সার্ভার থেকে মুছে যায় এবং আপনি লগআউট হয়ে যান।</p>
+          <p>As soon as you confirm, your account (name, mobile number, PIN hash, payment number) is deleted from our server and you are signed out.</p>
           <div className="pp-warn">
-            সতর্কতা: মুছে ফেলা অ্যাকাউন্ট ফেরানো যায় না। উত্তোলন না করা আয় থাকলে মোছার আগে অ্যাডমিনের সাথে যোগাযোগ করে তা বুঝে নিন।
+            Warning: a deleted account cannot be restored. If you have earnings you have not withdrawn, contact the admin before deleting so you can settle them.
           </div>
 
-          <h3>অ্যাপ ছাড়া (অ্যাপে ঢুকতে না পারলে বা অ্যাপ মুছে ফেললে)</h3>
-          <p>নিচে নাম ও নিবন্ধিত মোবাইল নাম্বার দিয়ে বোতাম চাপুন — হোয়াটসঅ্যাপ (<b>{WA_NUMBER}</b>) তৈরি বার্তাসহ খুলবে, আপনাকে শুধু "পাঠান" চাপতে হবে।</p>
+          <h3>Without the app (if you cannot sign in, or you removed the app)</h3>
+          <p>Enter your name and registered mobile number below and tap the button — WhatsApp (<b>{WA_NUMBER}</b>) opens with a ready message and you only need to press "Send".</p>
           <div className="pp-form">
-            <label htmlFor="ppName">আপনার নাম</label>
-            <input id="ppName" value={name} onChange={(e) => setName(e.target.value)} placeholder="অ্যাকাউন্টের নাম" autoComplete="name" />
-            <label htmlFor="ppPhone">নিবন্ধিত মোবাইল নাম্বার</label>
+            <label htmlFor="ppName">Your name</label>
+            <input id="ppName" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name on the account" autoComplete="name" />
+            <label htmlFor="ppPhone">Registered mobile number</label>
             <input id="ppPhone" type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="01XXXXXXXXX" autoComplete="tel" />
           </div>
           <div className="pp-btns">
-            <a className="pp-btn wa" href={waDelete} target="_blank" rel="noreferrer">হোয়াটসঅ্যাপে মোছার অনুরোধ পাঠান</a>
-            <a className="pp-btn mail" href={mailDelete}>ইমেইলে অনুরোধ পাঠান</a>
+            <a className="pp-btn wa" href={waDelete} target="_blank" rel="noreferrer">Send deletion request on WhatsApp</a>
+            <a className="pp-btn mail" href={mailDelete}>Send deletion request by email</a>
           </div>
           <p>
-            পরিচয় যাচাইয়ের পর আমরা যুক্তিসঙ্গত সময়ের (সাধারণত ৭ দিনের) মধ্যে অ্যাকাউন্ট ও সংশ্লিষ্ট ব্যক্তিগত তথ্য মুছে দেব এবং আপনাকে জানাব।
-            ইমেইল: <a href={'mailto:' + EMAIL}>{EMAIL}</a>
+            After verifying your identity we will delete your account and the personal data linked to it within a reasonable time (normally within 7 days) and let you know.
+            Email: <a href={'mailto:' + EMAIL}>{EMAIL}</a>
           </p>
-          <p>শুধু ফোনে সংরক্ষিত তথ্য (সেটিংস, API কী, খসড়া) মুছতে ফোনের সেটিংসে অ্যাপের "ডেটা মুছুন" ব্যবহার করুন বা অ্যাপটি আনইনস্টল করুন।</p>
+          <p>To remove data stored only on your phone (settings, API key, drafts), use "Clear data" for the app in your phone's settings, or uninstall the app.</p>
         </section>
 
         <section className="pp-card" id="rights">
-          <h2>৭. আপনার অধিকার</h2>
+          <h2>7. Your rights</h2>
           <ul>
-            <li>আপনার তথ্য জানতে চাওয়া ও সংশোধন করানো (পেমেন্ট নাম্বার অ্যাপের প্রোফাইল থেকেই বদলানো যায়)।</li>
-            <li>অ্যাকাউন্ট ও তথ্য মুছে ফেলার অনুরোধ।</li>
-            <li>যে-কোনো সময় অ্যাপ ব্যবহার বন্ধ করা এবং ঐচ্ছিক অনুমতি (ক্যামেরা, ছবি) ফোনের সেটিংস থেকে তুলে নেওয়া।</li>
+            <li>Ask what information we hold about you and have it corrected (you can change your payment number yourself from the app's Profile).</li>
+            <li>Ask for your account and data to be deleted.</li>
+            <li>Stop using the app at any time, and withdraw the optional permissions (camera, photos) from your phone's settings.</li>
           </ul>
-          <p>এসব অনুরোধের জন্য নিচের "যোগাযোগ" অংশের মাধ্যম ব্যবহার করুন।</p>
+          <p>For any of these requests, use the methods in the "Contact" section below.</p>
         </section>
 
         <section className="pp-card" id="security">
-          <h2>৮. নিরাপত্তা</h2>
+          <h2>8. Security</h2>
           <ul>
-            <li>সার্ভারের সাথে যোগাযোগ HTTPS-এ হয়।</li>
-            <li>PIN কখনো সাধারণ লেখায় রাখা হয় না — শুধু হ্যাশ থাকে।</li>
-            <li>আপনার নিজের API কী ও সেটিংস শুধু আপনার ফোনে থাকে।</li>
-            <li>অ্যাডমিন অ্যাক্সেস সীমিত। তবে কোনো অনলাইন ব্যবস্থাই শতভাগ নিরাপদ নয়; তাই নিজের PIN গোপন রাখুন এবং অন্য কাউকে দেবেন না।</li>
+            <li>Communication with our server uses HTTPS.</li>
+            <li>Your PIN is never kept as plain text — only a hash is stored.</li>
+            <li>Your own API key and settings stay only on your phone.</li>
+            <li>Admin access is limited. However, no online system is 100% secure, so please keep your PIN private and do not share it with anyone.</li>
           </ul>
         </section>
 
         <section className="pp-card" id="children">
-          <h2>৯. শিশুদের গোপনীয়তা</h2>
+          <h2>9. Children's privacy</h2>
           <p>
-            এই অ্যাপ আয়ের কাজ ও পেমেন্টের সাথে জড়িত, তাই <b>১৮ বছরের কম বয়সীদের জন্য নয়</b>। আমরা জেনেশুনে শিশুদের তথ্য সংগ্রহ করি না।
-            কোনো শিশুর তথ্য ভুলক্রমে নেওয়া হয়েছে মনে হলে জানান, আমরা তা মুছে দেব।
+            This app involves paid work and payouts, so it is <b>not intended for anyone under 18</b>. We do not knowingly collect information from children.
+            If you believe a child's information was collected by mistake, tell us and we will delete it.
           </p>
         </section>
 
         <section className="pp-card">
-          <h2>পলিসি পরিবর্তন</h2>
-          <p>আমরা সময়ে সময়ে এই পলিসি হালনাগাদ করতে পারি। গুরুত্বপূর্ণ পরিবর্তন হলে অ্যাপের নোটিশ বা এই পেইজে জানানো হবে। উপরে "সর্বশেষ হালনাগাদ" তারিখ দেখে নিন।</p>
+          <h2>Changes to this policy</h2>
+          <p>We may update this policy from time to time. If there is an important change, we will announce it in the app's notices or on this page. Please check the "Last updated" date above.</p>
         </section>
 
         <section className="pp-card" id="contact">
-          <h2>১০. যোগাযোগ</h2>
-          <p>প্রাইভেসি, তথ্য মোছা বা অন্য যে-কোনো প্রশ্নে:</p>
+          <h2>10. Contact</h2>
+          <p>For privacy questions, data deletion or anything else:</p>
           <ul>
-            <li>হোয়াটসঅ্যাপ: <a href={waLink('আসসালামু আলাইকুম, ' + APP_NAME + ' প্রাইভেসি/অ্যাকাউন্ট বিষয়ে একটি প্রশ্ন ছিল।')} target="_blank" rel="noreferrer">{WA_NUMBER}</a></li>
-            <li>ইমেইল: <a href={'mailto:' + EMAIL}>{EMAIL}</a></li>
-            <li>অ্যাপের ভেতরে: প্রোফাইল → "টিকেট খুলুন"</li>
-            <li>ওয়েবসাইট: <a href={SITE}>{SITE}</a></li>
+            <li>WhatsApp: <a href={waLink('Hello, I have a question about privacy / my account on ' + APP_NAME + '.')} target="_blank" rel="noreferrer">{WA_NUMBER}</a></li>
+            <li>Email: <a href={'mailto:' + EMAIL}>{EMAIL}</a></li>
+            <li>In the app: Profile → "Open a ticket"</li>
+            <li>Website: <a href={SITE}>{SITE}</a></li>
           </ul>
         </section>
 
