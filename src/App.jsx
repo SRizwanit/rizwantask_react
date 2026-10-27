@@ -9,8 +9,9 @@ import Profile from './pages/Profile.jsx';
 const Support = lazy(() => import('./pages/Support.jsx')); // Firebase আলাদা চাঙ্কে — অন্য পেইজ হালকা থাকে
 import Admin from './pages/Admin.jsx';
 import View from './pages/View.jsx';
+import PrivacyPolicy from './pages/PrivacyPolicy.jsx';
 
-const ROUTES = ['login', 'signup', 'task', 'profile', 'support', 'admin', 'view'];
+const ROUTES = ['login', 'signup', 'task', 'profile', 'support', 'admin', 'view', 'privacypolicy'];
 
 /* রাউটার ↔ পুরনো কোডের সেতু:
    ১) App.go()/location.href='…' রিয়্যাক্ট রাউটারের navigate ব্যবহার করে,
@@ -55,6 +56,7 @@ export default function App() {
         <Route path="/support" element={<Page><Suspense fallback={null}><Support /></Suspense></Page>} />
         <Route path="/admin" element={<Page><Admin /></Page>} />
         <Route path="/view" element={<Page><View /></Page>} />
+        <Route path="/privacypolicy" element={<Page><PrivacyPolicy /></Page>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
